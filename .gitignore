@@ -1,3 +1,6 @@
+# Carpetas y archivos a ignorados por git.
+
 .vscode/
 build/
 test/
+Consigna.pdf
