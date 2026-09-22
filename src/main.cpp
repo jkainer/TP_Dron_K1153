@@ -1,12 +1,16 @@
-#include <iostream>
-#include <stdio.h>
-#define CURSOR "-> " // Cursor indicativo de interfaz. Puramente estético.
-#define RUTA_MAX 100 // Tamaño máximo en caracteres posible para ruta de un archivo.
-using std::cin, std::cout, std::endl;
-
 // PascalCase para estructuras.
 // camelCase procedimientos.
 // snake_case para variables.
+// MACRO_CASE para macros.
+
+#include <iostream>
+#include <stdio.h>
+#define CURSOR "-> " // Cursor indicativo de interfaz. Puramente estético.
+#define RUTA_MAX 256 // Tamaño máximo en caracteres posible para ruta de un archivo.
+#define TABLA_TAMAÑO_X 5 // Tamaño horizontal de la tabla del órdenes.
+#define TABLA_TAMAÑO_Y 5 // Tamaño vertical de la tabla del órdenes.
+using std::cin, std::cout, std::endl;
+
 struct OrdenArchivo {
 	int x 					= 0;
 	int y 					= 0;
@@ -32,11 +36,19 @@ struct Orden {
 };
 
 // TODO: Cargar y validar registros del archivo.
-void cargarAtaque() {
+void cargarAtaque(Orden tabla[TABLA_TAMAÑO_Y][TABLA_TAMAÑO_Y]) {
 	FILE *archivo_ataque;
 	char direccion_archivo[RUTA_MAX];
+	int tamaño_archivo = 0;
 
 	cout << "Por favor, indique ruta del archivo de ataque a cargar." << endl;
+	// Acá estoy usando un While de una manera particular. Generalmente le pone una condición de
+	// salida y se comprueba cada loop, y se utilizan sentencias selectivas para lograr
+	// dicha condición de salida. En este caso ocurre lo contrario. No hay condición de salida
+	// y las sentencias selctivas son las que repiten el bucle, pero al llegar al final del bucle
+	// se consigue salir por la sentencia Break. Se eligió esta forma por la sencillez y
+	// claridad visual de su implementación, ya que permite secuenciar multiples condiciones de
+	// salida en sentencias If de manera clara.
 	while (true) {
 		cout << CURSOR;
 		// Se utiliza getline en vez de cin para poder incluir espacios
@@ -45,19 +57,75 @@ void cargarAtaque() {
 		cin.getline(direccion_archivo, RUTA_MAX);
 		//cin >> direccion_archivo;
 
-		if (archivo_ataque = fopen(direccion_archivo, "r+b")) break;
+		if (!(archivo_ataque = fopen(direccion_archivo, "r+b"))) {
+			cout << "La dirección del archivo ingresada es inválida o el archivo no existe. ";
+			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
+			continue; // Vuelve a empezar el loop while.
+		}
 
-		cout << "La dirección del archivo ingresada es inválida o el archivo no existe. ";
-		cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
+		cout << "Dirección de archivo válida." << endl;
+		fseek(archivo_ataque, 0, SEEK_END);
+		tamaño_archivo = ftell(archivo_ataque) / sizeof(OrdenArchivo); // Tamaño del archivo en casilleros.
+		if (tamaño_archivo != TABLA_TAMAÑO_X * TABLA_TAMAÑO_Y) {
+			cout << "El archivo cargado tiene un tamaño invalido. ";
+			cout << "Por favor, ingrese un archivo de ataque válido." << endl;
+			continue;
+		}
+		
+		cout << "Cargando archivo de ataque a memoria..." << endl;
+
+		// TODO: Cargar archivo a tabla según 'x' e 'y'.
+		// TODO: Comprobar condiciones de validación.
+
+		break;
 	};
 
-	cout << "Archivo válido." << endl;
+
 	fclose(archivo_ataque);
 	return;
 }
 
 
-void bucleMenu() {
+void guardarAtaque(Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]) {
+	char direccion_archivo[RUTA_MAX];
+	FILE *archivo_ataque;
+
+	cout << "Por favor, indique ruta de guardado del ataque." << endl;
+	while (true) {
+		cout << CURSOR;
+		// Se utiliza getline en vez de cin para poder incluir espacios
+		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
+		cin.getline(direccion_archivo, RUTA_MAX);
+		cin.getline(direccion_archivo, RUTA_MAX);
+		//cin >> direccion_archivo;
+
+		// Flag 'x' al modo para evitar la sobreescritura.
+		// TODO: Opción de sobreescribir.
+		if (!(archivo_ataque = fopen(direccion_archivo, "w+bx"))) {
+			cout << "La dirección del archivo ingresada es inválida o el archivo ya existe. ";
+			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
+			continue; // Vuelve a empezar el loop while.
+		}
+
+		break;
+	};
+
+	cout << "Guardando ataque..." << endl;
+	// FIXME: Cargar OrdenArchivo, no Orden.
+	fwrite(tabla, sizeof(Orden), TABLA_TAMAÑO_X * TABLA_TAMAÑO_Y, archivo_ataque);
+	cout << "Archivo guardado." << endl;
+	fclose(archivo_ataque);
+
+	return;
+}
+
+// TODO: Mostrar tabla de n * m tamaño.
+void mostrarAtaque() {
+	return;
+}
+
+
+void bucleMenu(Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]) {
 	int eleccion = 0;
 
 	do {
@@ -87,10 +155,10 @@ void bucleMenu() {
 				case 0:
 					cout << "Terminando ejecución." << endl;
 					break;
-				case 1:
-					cargarAtaque();
+				case 1: // Cargar archivo de ataque.
+					cargarAtaque(tabla);
 					break;
-				case 2:
+				case 2: // Mostrar archivo cargado.
 					cout << "Opción 2." << endl;
 					break;
 				case 3:
@@ -103,7 +171,7 @@ void bucleMenu() {
 					cout << "Opción 5." << endl;
 					break;
 				case 6:
-					cout << "Opción 6." << endl;
+					guardarAtaque(tabla);
 					break;
 				case 7:
 					cout << "Opción 7." << endl;
@@ -115,7 +183,9 @@ void bucleMenu() {
 
 
 int main() {
-	bucleMenu();
+	Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]; // Tabla de órdenes.
+
+	bucleMenu(tabla);
 
 	return 0;
 }
