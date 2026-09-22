@@ -7,8 +7,8 @@
 #include <stdio.h>
 #define CURSOR "-> " // Cursor indicativo de interfaz. Puramente estético.
 #define RUTA_MAX 256 // Tamaño máximo en caracteres posible para ruta de un archivo.
-#define TABLA_TAMAÑO_X 5 // Tamaño horizontal de la tabla del órdenes.
-#define TABLA_TAMAÑO_Y 5 // Tamaño vertical de la tabla del órdenes.
+#define TABLA_TAMANO_X 5 // Tamaño horizontal de la tabla del órdenes.
+#define TABLA_TAMANO_Y 5 // Tamaño vertical de la tabla del órdenes.
 using std::cin, std::cout, std::endl;
 
 struct OrdenArchivo {
@@ -36,7 +36,7 @@ struct Orden {
 };
 
 // TODO: Cargar y validar registros del archivo.
-void cargarAtaque(Orden tabla[TABLA_TAMAÑO_Y][TABLA_TAMAÑO_Y]) {
+void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	FILE *archivo_ataque;
 	char direccion_archivo[RUTA_MAX];
 	int tamaño_archivo = 0;
@@ -66,7 +66,7 @@ void cargarAtaque(Orden tabla[TABLA_TAMAÑO_Y][TABLA_TAMAÑO_Y]) {
 		cout << "Dirección de archivo válida." << endl;
 		fseek(archivo_ataque, 0, SEEK_END);
 		tamaño_archivo = ftell(archivo_ataque) / sizeof(OrdenArchivo); // Tamaño del archivo en casilleros.
-		if (tamaño_archivo != TABLA_TAMAÑO_X * TABLA_TAMAÑO_Y) {
+		if (tamaño_archivo != TABLA_TAMANO_X * TABLA_TAMANO_Y) {
 			cout << "El archivo cargado tiene un tamaño invalido. ";
 			cout << "Por favor, ingrese un archivo de ataque válido." << endl;
 			continue;
@@ -86,7 +86,7 @@ void cargarAtaque(Orden tabla[TABLA_TAMAÑO_Y][TABLA_TAMAÑO_Y]) {
 }
 
 
-void guardarAtaque(Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]) {
+void guardarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	char direccion_archivo[RUTA_MAX];
 	FILE *archivo_ataque;
 
@@ -112,7 +112,7 @@ void guardarAtaque(Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]) {
 
 	cout << "Guardando ataque..." << endl;
 	// FIXME: Cargar OrdenArchivo, no Orden.
-	fwrite(tabla, sizeof(Orden), TABLA_TAMAÑO_X * TABLA_TAMAÑO_Y, archivo_ataque);
+	fwrite(tabla, sizeof(Orden), TABLA_TAMANO_X * TABLA_TAMANO_Y, archivo_ataque);
 	cout << "Archivo guardado." << endl;
 	fclose(archivo_ataque);
 
@@ -125,7 +125,7 @@ void mostrarAtaque() {
 }
 
 
-void bucleMenu(Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]) {
+void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	int eleccion = 0;
 
 	do {
@@ -183,7 +183,7 @@ void bucleMenu(Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]) {
 
 
 int main() {
-	Orden tabla[TABLA_TAMAÑO_X][TABLA_TAMAÑO_Y]; // Tabla de órdenes.
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]; // Tabla de órdenes.
 
 	bucleMenu(tabla);
 
