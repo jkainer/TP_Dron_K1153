@@ -7,8 +7,8 @@
 #include <stdio.h>
 #define CURSOR "-> " // Cursor indicativo de interfaz. Puramente estético.
 #define RUTA_MAX 256 // Tamaño máximo en caracteres posible para ruta de un archivo.
-#define TABLA_TAMANO_X 5 // Tamaño horizontal de la tabla del órdenes.
-#define TABLA_TAMANO_Y 5 // Tamaño vertical de la tabla del órdenes.
+#define TABLA_TAMANO_X 100 // Tamaño horizontal de la tabla del órdenes.
+#define TABLA_TAMANO_Y 100 // Tamaño vertical de la tabla del órdenes.
 using std::cin, std::cout, std::endl;
 
 struct OrdenArchivo {
@@ -133,6 +133,9 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	bool flag_granada1 = false;
 	bool flag_granada2 = false;
 	bool flag_posiciones_transitadas[TABLA_TAMANO_X][TABLA_TAMANO_Y] = {false};
+	unsigned int respuesta_tiempo = 0;
+	unsigned int respuesta_x = 0;
+	unsigned int respuesta_y = 0;
 
 	for (int y = 0; y < TABLA_TAMANO_Y; y++) {
 		for (int x = 0; x < TABLA_TAMANO_X; x++) {
@@ -202,7 +205,7 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
 			}
 			
-			while (!flag_granada1 || !tabla[x][y].despegue) {
+			while (!flag_granada1 && !tabla[x][y].despegue) {
 				cout << "  ¿Soltar granada nº1? [s/n]" << endl;
 				cout << "  " << CURSOR;
 				cin >> respuesta;
@@ -217,7 +220,7 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
 			}
 			
-			while (!flag_granada2 || !tabla[x][y].despegue) {
+			while (!flag_granada2 && !tabla[x][y].despegue) {
 				cout << "  ¿Soltar granada nº2? [s/n]" << endl;
 				cout << "  " << CURSOR;
 				cin >> respuesta;
@@ -232,11 +235,17 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
 			}
 
+			while (true) {
+				cout << "  Tiempo de espera (Segundos)." << endl;
+				cout << "  " << CURSOR;
+				cin >> respuesta_tiempo;
+				// TODO: Comprobar condición de invalidez.
+				break;
+			}
+
 			// Este es el caso de implementación alterna del que hablo más arriba.
-			cout << "  Posición siguiente [X ✕ Y]" << endl;
 			while (!tabla[x][y].aterrizaje) {
-				unsigned int respuesta_x = 0;
-				unsigned int respuesta_y = 0;
+				cout << "  Posición siguiente [X ✕ Y]." << endl;
 				cout << "  " << CURSOR;
 				cin >> respuesta_x;
 				cout << "  " << CURSOR;
@@ -308,31 +317,31 @@ void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 			// Un poquito de diseño de tui.
 			cout << "┌─────────────────────────────────────┐" << endl;
 
-			cout << "│ " << "Despegue: ";
+			cout << "│ " << "Despegue:                     ";
 			cout << (pagina_tabla.despegue ? "Veradero" : "Falso") << endl;
 
-			cout << "│ " << "Aterrizaje: ";
+			cout << "│ " << "Aterrizaje:                   ";
 			cout << (pagina_tabla.aterrizaje ? "Veradero" : "Falso") << endl;
 
-			cout << "│ " << "Soltar granada nº1: ";
+			cout << "│ " << "Soltar granada nº1:           ";
 			cout << (pagina_tabla.soltar_granada1  ? "Veradero" : "Falso") << endl;
 
-			cout << "│ " << "Soltar granada nº2: ";
+			cout << "│ " << "Soltar granada nº2:           ";
 			cout << (pagina_tabla.soltar_granada2 ? "Veradero" : "Falso") << endl;
 
-			cout << "│ " << "Ataque kamikaze: ";
+			cout << "│ " << "Ataque kamikaze:              ";
 			cout << (pagina_tabla.ataque_kamikaze ? "Veradero" : "Falso") << endl;
 
-			cout << "│ " <<  "Espera [Segundos]: ";
-			cout << pagina_tabla.espera << endl;
+			cout << "│ " <<  "Espera [Segundos]:           ";
+			cout << pagina_tabla.espera << " s" << endl;
 
 			cout << "│ " << "Posición siguiente [X ✕ Y]: ";
-			cout << pagina_tabla.siguiente_x + 1 << " ✕ ";
-			cout << pagina_tabla.siguiente_y + 1 << endl;
+			cout << pagina_tabla.siguiente_x + 1 << " ✕ " << pagina_tabla.siguiente_y + 1 << endl;
 			// Se le suma 1 a las coordenadas para volverlas amistosas para el usuario.
 			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
 
-			cout << "│ " << "Posición actual [X ✕ Y]: " << x + 1 << " ✕ " << y + 1 << endl;
+			cout << "│ " << "Posición actual [X ✕ Y]:  ";
+			cout << x + 1 << " ✕ " << y + 1 << endl;
 			cout << "└─ Presione Enter para continuar... ──┘" << endl;
 
 			cin.get();
