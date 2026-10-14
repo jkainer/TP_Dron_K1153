@@ -35,6 +35,7 @@ struct Orden {
 	int siguiente_y 		= 0;
 };
 
+
 // TODO: Cargar y validar registros del archivo.
 void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	FILE *archivo_ataque;
@@ -112,12 +113,42 @@ void guardarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 	cout << "Guardando ataque..." << endl;
 	// FIXME: Cargar OrdenArchivo, no Orden.
-	fwrite(tabla, sizeof(Orden), TABLA_TAMANO_X * TABLA_TAMANO_Y, archivo_ataque);
+	//fwrite(tabla, sizeof(Orden), TABLA_TAMANO_X * TABLA_TAMANO_Y, archivo_ataque);
 	cout << "Archivo guardado." << endl;
 	fclose(archivo_ataque);
 
 	return;
 }
+
+// Paso 1: Crear archivo
+// Paso 2: Llenar tabla registro por registro.
+// Paso 3: Guardar tabla en archivo creado.
+void crearAtaque() {
+	char direccion_archivo[RUTA_MAX];
+	FILE *archivo_ataque;
+
+	cout << "Por favor, indique ruta de guardado del ataque." << endl;
+	while (true) {
+		cout << CURSOR;
+		// Se utiliza getline en vez de cin para poder incluir espacios
+		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
+		cin.getline(direccion_archivo, RUTA_MAX);
+		cin.getline(direccion_archivo, RUTA_MAX);
+		//cin >> direccion_archivo;
+
+		// Flag 'x' al modo para evitar la sobreescritura.
+		// TODO: Opción de sobreescribir.
+		if ( !(archivo_ataque = fopen(direccion_archivo, "w+bx")) ) {
+			cout << "La dirección del archivo ingresada es inválida o el archivo ya existe. ";
+			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
+			continue; // Vuelve a empezar el loop while.
+		}
+		break;
+	};
+
+	return;
+}
+
 
 // TODO: Mostrar tabla de n * m tamaño.
 void mostrarAtaque() {
@@ -162,7 +193,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 					cout << "Opción 2." << endl;
 					break;
 				case 3:
-					cout << "Opción 3." << endl;
+					crearAtaque();
 					break;
 				case 4:
 					cout << "Opción 4." << endl;
@@ -170,7 +201,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 				case 5:
 					cout << "Opción 5." << endl;
 					break;
-				case 6:
+				case 6: // Guardar archivo de ataque.
 					guardarAtaque(tabla);
 					break;
 				case 7:
@@ -184,7 +215,6 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 int main() {
 	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]; // Tabla de órdenes.
-
 	bucleMenu(tabla);
 
 	return 0;
