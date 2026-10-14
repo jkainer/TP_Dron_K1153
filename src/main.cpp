@@ -149,9 +149,50 @@ void crearAtaque() {
 	return;
 }
 
+// FIXME: 
+void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+	Orden pagina_tabla;
+	
+	// Procedimiento para evitar leading whitespace al seleccionar esta opción.
+	cin.get();
+	
+	for (int y = 0; y < TABLA_TAMANO_Y; y++) {
+		for (int x = 0; x < TABLA_TAMANO_X; x++) {
+			pagina_tabla = tabla[x][y];
 
-// TODO: Mostrar tabla de n * m tamaño.
-void mostrarAtaque() {
+			// Un poquito de diseño de tui
+			cout << "┌─────────────────────────────────────┐" << endl;
+
+			cout << "│ " << "Despegue: ";
+			cout << (pagina_tabla.despegue ? "Veradero" : "Falso") << endl;
+
+			cout << "│ " << "Aterrizaje: ";
+			cout << (pagina_tabla.aterrizaje ? "Veradero" : "Falso") << endl;
+
+			cout << "│ " << "Soltar granada nº1: ";
+			cout << (pagina_tabla.soltar_granada1  ? "Veradero" : "Falso") << endl;
+
+			cout << "│ " << "Soltar granada nº2: ";
+			cout << (pagina_tabla.soltar_granada2 ? "Veradero" : "Falso") << endl;
+
+			cout << "│ " << "Ataque kamikaze: ";
+			cout << (pagina_tabla.ataque_kamikaze ? "Veradero" : "Falso") << endl;
+
+			cout << "│ " <<  "Espera [Segundos]: ";
+			cout << pagina_tabla.espera << endl;
+
+			cout << "│ " << "Posición siguiente [X ✕ Y]: ";
+			cout << pagina_tabla.siguiente_x + 1 << " ✕ ";
+			cout << pagina_tabla.siguiente_y + 1 << endl;
+			// Se le suma 1 a las coordenadas para volverlas amistosas para el usuario.
+			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0)
+
+			cout << "│ " << "Posición actual [X ✕ Y]: " << x + 1 << " ✕ " << y + 1 << endl;
+			cout << "└─ Presione Enter para continuar... ──┘" << endl;
+
+			cin.get();
+		}
+	}
 	return;
 }
 
@@ -190,7 +231,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 					cargarAtaque(tabla);
 					break;
 				case 2: // Mostrar archivo cargado.
-					cout << "Opción 2." << endl;
+					mostrarAtaque(tabla);
 					break;
 				case 3:
 					crearAtaque();
@@ -214,7 +255,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 
 int main() {
-	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]; // Tabla de órdenes.
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]; // Tabla de órdenes en memoria.
 	bucleMenu(tabla);
 
 	return 0;
