@@ -149,7 +149,7 @@ void crearAtaque() {
 	return;
 }
 
-// FIXME: 
+
 void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	Orden pagina_tabla;
 	
