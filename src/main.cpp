@@ -123,9 +123,152 @@ void guardarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 // Paso 1: Crear archivo
 // Paso 2: Llenar tabla registro por registro.
 // Paso 3: Guardar tabla en archivo creado.
-void crearAtaque() {
+void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+	char respuesta = ' ';
+	bool flag_despegue = false; // Solo puede haber una casilla de despegue por tabla.
+	unsigned flag_despegue_x = 0;
+	unsigned flag_despegue_y = 0;
+	bool flag_aterrizaje = false;
+	bool flag_kamikaze = false;
+	bool flag_granada1 = false;
+	bool flag_granada2 = false;
+	bool flag_posiciones_transitadas[TABLA_TAMANO_X][TABLA_TAMANO_Y] = {false};
+
+	for (int y = 0; y < TABLA_TAMANO_Y; y++) {
+		for (int x = 0; x < TABLA_TAMANO_X; x++) {
+			cout << "Posición " << x + 1 << " ✕ " << y + 1 << ":" << endl;
+
+			// Un While por valor a introducir es una implementación un poco
+			// exagerada, pero como expliqué anteriormente, me da la flexibilidad
+			// de permitirle al usuario introducir un valor no válido y corregirlo
+			// antes de continuar con la ejecución.
+			// Cabe destacar también que en este caso se utiliza una disposición
+			// donde la función If es la que otorga la condición de salida del bucle,
+			// a diferencia de casos posteriores donde otorga la condición de permanencia.
+			// Esto es porque en este caso particular, la cantidad de valores válidos son
+			// limitados y determinables, donde los inválidos son indeterminables; a
+			// diferencia de casos posteriores donde los valores válidos son indeterminados
+			// mientras que los inválidos son determinados. Una manera de adaptar esta
+			// implementación es la de usar condiciones negativas (Ej: cuando la respuesta
+			// no sea 's' ni 'n'), pero se decidió de esta manera para evitar agregar ruido
+			// visual con Ifs de varias condiciones, que más tarde serían
+			// comparadas igualmente.
+			while (!flag_despegue) {
+				// TODO: Crear respuesta predeterminada (Ej: Presionar Enter sin llenar
+				// la entrada y que se asuma una opción válida).
+				cout << "  ¿Despegue? [s/n]" << endl;
+				cout << "  " << CURSOR;
+				cin >> respuesta;
+				if (respuesta == 's') {
+					tabla[x][y].despegue = true;
+					flag_despegue = true;
+					flag_despegue_x = x;
+					flag_despegue_y = y;
+					break;
+				} else if (respuesta == 'n') {
+					tabla[x][y].despegue = false;
+					break;
+				}
+				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+			}
+			
+			while (!flag_aterrizaje && !flag_kamikaze && !tabla[x][y].despegue) {
+				cout << "  ¿Aterrizaje? [s/n]" << endl;
+				cout << "  " << CURSOR;
+				cin >> respuesta;
+				if (respuesta == 's') {
+					tabla[x][y].aterrizaje = true;
+					flag_aterrizaje = true;
+					break;
+				} else if (respuesta == 'n') {
+					tabla[x][y].aterrizaje = false;
+					break;
+				}
+				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+			}
+			
+			while (!flag_aterrizaje && !flag_kamikaze && !tabla[x][y].despegue) {
+				cout << "  ¿Ataque kamikaze? [s/n]" << endl;
+				cout << "  " << CURSOR;
+				cin >> respuesta;
+				if (respuesta == 's') {
+					tabla[x][y].ataque_kamikaze = true;
+					flag_aterrizaje = true;
+					break;
+				} else if (respuesta == 'n') {
+					tabla[x][y].ataque_kamikaze = false;
+					break;
+				}
+				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+			}
+			
+			while (!flag_granada1 || !tabla[x][y].despegue) {
+				cout << "  ¿Soltar granada nº1? [s/n]" << endl;
+				cout << "  " << CURSOR;
+				cin >> respuesta;
+				if (respuesta == 's') {
+					tabla[x][y].soltar_granada1 = true;
+					flag_granada1 = true;
+					break;
+				} else if (respuesta == 'n') {
+					tabla[x][y].soltar_granada1 = false;
+					break;
+				}
+				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+			}
+			
+			while (!flag_granada2 || !tabla[x][y].despegue) {
+				cout << "  ¿Soltar granada nº2? [s/n]" << endl;
+				cout << "  " << CURSOR;
+				cin >> respuesta;
+				if (respuesta == 's') {
+					tabla[x][y].soltar_granada2 = true;
+					flag_granada2 = true;
+					break;
+				} else if (respuesta == 'n') {
+					tabla[x][y].soltar_granada2 = false;
+					break;
+				}
+				cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+			}
+
+			// Este es el caso de implementación alterna del que hablo más arriba.
+			cout << "  Posición siguiente [X ✕ Y]" << endl;
+			while (!tabla[x][y].aterrizaje) {
+				unsigned int respuesta_x = 0;
+				unsigned int respuesta_y = 0;
+				cout << "  " << CURSOR;
+				cin >> respuesta_x;
+				cout << "  " << CURSOR;
+				cin >> respuesta_y;
+				respuesta_x--;
+				respuesta_y--;
+				if (respuesta_x > TABLA_TAMANO_X || respuesta_y > TABLA_TAMANO_Y) {
+					cout << "Posición no válida. Vuelva a intentarlo." << endl;
+					continue;
+				}
+				if (flag_posiciones_transitadas[respuesta_x][respuesta_y]) {
+					cout << "Posición ya transitada. Elija otra posición." << endl;
+					continue;
+				}
+				tabla[x][y].siguiente_x = respuesta_x;
+				tabla[x][y].siguiente_y = respuesta_y;
+				flag_posiciones_transitadas[respuesta_x][respuesta_y] = true;
+				break;
+			}
+
+			// TODO: Agregar procedimiento para recorrer tabla.
+		}
+	}
+
+	return;
+}
+
+void crearArchivo() {
 	char direccion_archivo[RUTA_MAX];
 	FILE *archivo_ataque;
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y];
+	OrdenArchivo tabla_archivo[TABLA_TAMANO_X][TABLA_TAMANO_Y];
 
 	cout << "Por favor, indique ruta de guardado del ataque." << endl;
 	while (true) {
@@ -146,6 +289,8 @@ void crearAtaque() {
 		break;
 	};
 
+
+
 	return;
 }
 
@@ -160,7 +305,7 @@ void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 		for (int x = 0; x < TABLA_TAMANO_X; x++) {
 			pagina_tabla = tabla[x][y];
 
-			// Un poquito de diseño de tui
+			// Un poquito de diseño de tui.
 			cout << "┌─────────────────────────────────────┐" << endl;
 
 			cout << "│ " << "Despegue: ";
@@ -185,7 +330,7 @@ void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 			cout << pagina_tabla.siguiente_x + 1 << " ✕ ";
 			cout << pagina_tabla.siguiente_y + 1 << endl;
 			// Se le suma 1 a las coordenadas para volverlas amistosas para el usuario.
-			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0)
+			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
 
 			cout << "│ " << "Posición actual [X ✕ Y]: " << x + 1 << " ✕ " << y + 1 << endl;
 			cout << "└─ Presione Enter para continuar... ──┘" << endl;
@@ -233,8 +378,8 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 				case 2: // Mostrar archivo cargado.
 					mostrarAtaque(tabla);
 					break;
-				case 3:
-					crearAtaque();
+				case 3: // Crear archivo de ataque nuevo y poblarlo
+					poblarArchivo(tabla);
 					break;
 				case 4:
 					cout << "Opción 4." << endl;
