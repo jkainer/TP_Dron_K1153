@@ -2,6 +2,6 @@
 
 .vscode/
 build/
-test/
+src/test/
 Consigna.pdf
 src/bin02
