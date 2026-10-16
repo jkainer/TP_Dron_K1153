@@ -94,72 +94,6 @@ bool validacionTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 }
 
 
-void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
-	FILE *archivo_ataque;
-	char direccion_archivo[RUTA_MAX];
-	int tamaño_archivo = 0;
-
-	cout << "Por favor, indique ruta del archivo de ataque a cargar." << endl;
-	// Acá estoy usando un While de una manera particular. Generalmente le pone una condición de
-	// salida y se comprueba cada loop, y se utilizan sentencias selectivas para lograr
-	// dicha condición de salida. En este caso ocurre lo contrario. No hay condición de salida
-	// y las sentencias selctivas son las que repiten el bucle, pero al llegar al final del bucle
-	// se consigue salir por la sentencia Break. Se eligió esta forma por la sencillez y
-	// claridad visual de su implementación, ya que permite secuenciar multiples condiciones de
-	// salida en sentencias If de manera clara.
-	while (true) {
-		cout << CURSOR;
-
-		// Se utiliza getline en vez de cin para poder incluir espacios
-		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
-		cin.getline(direccion_archivo, RUTA_MAX);
-		cin.getline(direccion_archivo, RUTA_MAX);
-		//cin >> direccion_archivo;
-
-		if (!(archivo_ataque = fopen(direccion_archivo, "r+b"))) {
-			// MSG_ERROR
-			cout << "Error: La dirección del archivo ingresada es inválida o el archivo no existe. ";
-			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
-			continue; // Vuelve a empezar el loop while.
-		}	
-
-		cout << "Dirección de archivo válida." << endl;
-		fseek(archivo_ataque, 0, SEEK_END);
-		// FIXME: 16/10 Cambiar tamaño de Orden a OrdenArchivo.
-		tamaño_archivo = ftell(archivo_ataque) / sizeof(Orden); // Tamaño del archivo en casilleros.
-		if (tamaño_archivo != TABLA_TAMANO_X * TABLA_TAMANO_Y) {
-			// MSG_ERROR
-			cout << "Error: El archivo cargado tiene un tamaño invalido. ";
-			cout << "Por favor, ingrese un archivo de ataque válido." << endl;
-			continue;
-		}	
-		
-		cout << "Cargando archivo de ataque a memoria..." << endl;
-
-		// FIXME: 16/10 Cambiar tipo de prototipo de variable a guardar de Orden a OrdenArchivo.
-		// e integrar sistema correspondiente de adaptación.
-		fseek(archivo_ataque, 0, SEEK_SET);
-		fread(
-			tabla,
-			sizeof(Orden),
-			TABLA_TAMANO_X * TABLA_TAMANO_Y,
-			archivo_ataque
-		);
-		if (!validacionTabla(tabla)) {
-			// MSG_ERROR
-			cout << "Error: El archivo ingresado contiene una o más instrucciones inválidas." << endl;
-			continue;
-		}
-
-		break;
-	};
-
-	flag_tabla_cargada = true;
-	fclose(archivo_ataque);
-	return;
-}
-
-
 // Paso 1: Crear archivo.
 // Paso 2: Poblar tabla registro por registro.
 // Paso 3: Guardar tabla en archivo creado.
@@ -305,6 +239,7 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 			while (true) {
 				cout << "  Tiempo de espera (Segundos)." << endl;
 				cout << "  " << CURSOR;
+				// FIXME: 16/10 Failsafe caracter en vez de número.
 				cin >> respuesta_tiempo;
 				// TODO: Crear condiciones de invalidez.
 				tabla[x][y].espera = respuesta_tiempo;
@@ -320,8 +255,10 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 			) {
 				cout << "  Posición siguiente [X ✕ Y]." << endl;
 				cout << "  " << CURSOR;
+				// FIXME: 16/10 Failsafe caracter en vez de número.
 				cin >> respuesta_x;
 				cout << "  " << CURSOR;
+				// FIXME: 16/10 Failsafe caracter en vez de número.
 				cin >> respuesta_y;
 				// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
 				respuesta_x--;
@@ -388,6 +325,74 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 }
 
 
+void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
+	FILE *archivo_ataque;
+	char direccion_archivo[RUTA_MAX];
+	int tamaño_archivo = 0;
+
+	cout << "Por favor, indique ruta del archivo de ataque a cargar." << endl;
+	// Acá estoy usando un While de una manera particular. Generalmente le pone una condición de
+	// salida y se comprueba cada loop, y se utilizan sentencias selectivas para lograr
+	// dicha condición de salida. En este caso ocurre lo contrario. No hay condición de salida
+	// y las sentencias selctivas son las que repiten el bucle, pero al llegar al final del bucle
+	// se consigue salir por la sentencia Break. Se eligió esta forma por la sencillez y
+	// claridad visual de su implementación, ya que permite secuenciar multiples condiciones de
+	// salida en sentencias If de manera clara.
+	while (true) {
+		cout << CURSOR;
+
+		// Se utiliza getline en vez de cin para poder incluir espacios
+		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
+		// FIXME: 16/10 Detección de tecla Esc para salir.
+		// FIXME: 16/10 Detección flechas para moverse al introducir texto.
+		cin.getline(direccion_archivo, RUTA_MAX);
+		cin.getline(direccion_archivo, RUTA_MAX);
+		//cin >> direccion_archivo;
+
+		if (!(archivo_ataque = fopen(direccion_archivo, "r+b"))) {
+			// MSG_ERROR
+			cout << "Error: La dirección del archivo ingresada es inválida o el archivo no existe. ";
+			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
+			continue; // Vuelve a empezar el loop while.
+		}	
+
+		cout << "Dirección de archivo válida." << endl;
+		fseek(archivo_ataque, 0, SEEK_END);
+		// FIXME: 16/10 Cambiar tamaño de Orden a OrdenArchivo.
+		tamaño_archivo = ftell(archivo_ataque) / sizeof(Orden); // Tamaño del archivo en casilleros.
+		if (tamaño_archivo != TABLA_TAMANO_X * TABLA_TAMANO_Y) {
+			// MSG_ERROR
+			cout << "Error: El archivo cargado tiene un tamaño invalido. ";
+			cout << "Por favor, ingrese un archivo de ataque válido." << endl;
+			continue;
+		}	
+		
+		cout << "Cargando archivo de ataque a memoria..." << endl;
+
+		// FIXME: 16/10 Cambiar tipo de prototipo de variable a guardar de Orden a OrdenArchivo.
+		// e integrar sistema correspondiente de adaptación.
+		fseek(archivo_ataque, 0, SEEK_SET);
+		fread(
+			tabla,
+			sizeof(Orden),
+			TABLA_TAMANO_X * TABLA_TAMANO_Y,
+			archivo_ataque
+		);
+		if (!validacionTabla(tabla)) {
+			// MSG_ERROR
+			cout << "Error: El archivo ingresado contiene una o más instrucciones inválidas." << endl;
+			continue;
+		}
+
+		break;
+	};
+
+	flag_tabla_cargada = true;
+	fclose(archivo_ataque);
+	return;
+}
+
+
 // "crearArchivo()" no pide como parametro la tabla global, ya que esta no
 // se utiliza fuera de su propio procedimiento. Está contenida dentro de
 // la creación del archivo en donde se almacenará. Para interactuar con
@@ -404,6 +409,8 @@ void crearArchivo() {
 		cout << CURSOR;
 		// Se utiliza getline en vez de cin para poder incluir espacios
 		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
+		// FIXME: 16/10 Detección de tecla Esc para salir.
+		// FIXME: 16/10 Detección flechas para moverse al introducir texto.
 		cin.getline(direccion_archivo, RUTA_MAX);
 		cin.getline(direccion_archivo, RUTA_MAX);
 		//cin >> direccion_archivo;
@@ -532,7 +539,7 @@ void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla
 		cout << "│ " <<  "Espera [Segundos]:           ";
 		// TODO: Agregar sistema de formato.
 		// (Desplazar cierta cantidad de espacios para que quede anclado a la derecha
-		// dependiendo del tamaño del numero de segundos).
+		// dependiendo del tamaño del número de segundos).
 		cout << pagina_tabla.espera << " s" << endl;
 
 		cout << "│ " << "Posición siguiente [X ✕ Y]: ";
@@ -572,6 +579,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 		}
 
 		cout << CURSOR;
+		// FIXME: 16/10 Failsafe para caracter en vez de número.
 		cin >> eleccion;
 		switch (eleccion) {
 			default:
