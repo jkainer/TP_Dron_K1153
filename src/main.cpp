@@ -11,7 +11,6 @@
 #define TABLA_TAMANO_Y 5 // Tamaño vertical de la tabla del órdenes.
 using std::cin, std::cout, std::endl;
 
-// TODO: Crear protocolo de conversión de Orden a OrdenArchivo y viseversa.
 struct OrdenArchivo {
 	int x 					= 0;
 	int y 					= 0;
@@ -36,32 +35,150 @@ struct Orden {
 	int siguiente_y 		= 0;
 };
 
+struct Flags {
+	bool despegue 		= false; // Solo puede haber una celda de despegue por tabla.
+	bool aterrizaje 	= false;
+	bool kamikaze 		= false;
+	bool granada1 		= false;
+	bool granada2 		= false;
+	bool posiciones_transitadas[TABLA_TAMANO_X][TABLA_TAMANO_Y] = { false };
+};
 
-bool recorridoTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], int despegue_x, int despegue_y) {
-	int x = despegue_x, y = despegue_y;
-	int siguiente_x = -1, siguiente_y = -1;
+
+void clonarTabla(
+	Orden original[TABLA_TAMANO_X][TABLA_TAMANO_Y],
+	Orden copia[TABLA_TAMANO_X][TABLA_TAMANO_Y]
+) {
+	for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
+		copia[x][y] = original[x][y];
+	} }
+	return;
+}
+
+
+bool tablaCargada(bool flag_tabla_cargada) {
+	if (!flag_tabla_cargada) {
+		// MSG_ERROR
+		cout << "Error: No hay una tabla de órdenes cargada. ";
+		cout << "Cargue o cree una tabla primero para poder visualizarla." << endl;
+		return true;
+	}
+	return false;
+}
+
+
+void archivoATabla(
+	OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y],
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]
+) {
+	unsigned int tabla_x = -1, tabla_y = -1;
+	for (int i = 0; i < TABLA_TAMANO_X * TABLA_TAMANO_Y; i++) {
+		tabla_x = lista_archivo[i].x;
+		tabla_y = lista_archivo[i].y;
+
+		tabla[tabla_x][tabla_y].despegue 		= lista_archivo[i].despegue;
+		tabla[tabla_x][tabla_y].aterrizaje 		= lista_archivo[i].aterrizaje;
+		tabla[tabla_x][tabla_y].soltar_granada1 = lista_archivo[i].soltar_granada1;
+		tabla[tabla_x][tabla_y].soltar_granada2 = lista_archivo[i].soltar_granada2;
+		tabla[tabla_x][tabla_y].ataque_kamikaze = lista_archivo[i].ataque_kamikaze;
+		tabla[tabla_x][tabla_y].espera 			= lista_archivo[i].espera;
+		tabla[tabla_x][tabla_y].siguiente_x 	= lista_archivo[i].siguiente_x;
+		tabla[tabla_x][tabla_y].siguiente_y 	= lista_archivo[i].siguiente_y;
+	}
+
+	return;
+}
+
+
+void tablaAArchivo(
+	OrdenArchivo tabla_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y],
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]
+) {
+	int n = 0;
+	for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
+		tabla_archivo[n].x = x;
+		tabla_archivo[n].y = y;
+
+		tabla_archivo[n].despegue 			= tabla[x][y].despegue;
+		tabla_archivo[n].aterrizaje 		= tabla[x][y].aterrizaje;
+		tabla_archivo[n].soltar_granada1 	= tabla[x][y].soltar_granada1;
+		tabla_archivo[n].soltar_granada2 	= tabla[x][y].soltar_granada2;
+		tabla_archivo[n].ataque_kamikaze 	= tabla[x][y].ataque_kamikaze;
+		tabla_archivo[n].espera 			= tabla[x][y].espera;
+		tabla_archivo[n].siguiente_x 		= tabla[x][y].siguiente_x;
+		tabla_archivo[n].siguiente_y 		= tabla[x][y].siguiente_y;
+		n++;
+	} }
+
+	return;
+}
+
+
+bool recorridoTabla(
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y],
+	unsigned int despegue_x, unsigned int despegue_y
+) {
+	unsigned x = despegue_x, y = despegue_y;
 	unsigned int celdas_recorridas = 0;
+	bool flag_posiciones_transitadas[TABLA_TAMANO_X][TABLA_TAMANO_Y] = { false };
+	Orden pagina_tabla;
 
 	while (true) {
-		celdas_recorridas++;
+		pagina_tabla = tabla[x][y];
 
 		// DEBUG ----
-		// cout << "Celda ";
-		// cout << x + 1 << " ✕ " << y + 1;
-		// if (tabla[x][y].despegue) cout << " (Celda de despeje)";
-		// if (tabla[x][y].aterrizaje) cout << " (Celda de aterrizaje)";
-		// if (tabla[x][y].ataque_kamikaze) cout << " (Celda kamikaze)";
-		// if (tabla[x][y].soltar_granada1) cout << " (Granada 1)";
-		// if (tabla[x][y].soltar_granada2) cout << " (Granada 2)";
+		// cout << " # Celda ";
+		// cout << "(" << x + 1 << ";" << y + 1 << ")";
+		// if (pagina_tabla.despegue) 			cout << " (Celda de despegue)";
+		// if (pagina_tabla.aterrizaje) 		cout << " (Celda de aterrizaje)";
+		// if (pagina_tabla.ataque_kamikaze) 	cout << " (Celda kamikaze)";
+		// if (pagina_tabla.soltar_granada1) 	cout << " (Granada 1)";
+		// if (pagina_tabla.soltar_granada2) 	cout << " (Granada 2)";
+		// if (!pagina_tabla.aterrizaje && !pagina_tabla.ataque_kamikaze) {
+		// 	cout << " → ";
+		// 	cout << "Celda ";
+		// 	cout << "(" << pagina_tabla.siguiente_x + 1 << ";" << pagina_tabla.siguiente_y + 1 << ")";
+		// }
 		// cout << endl;
 		// ----------
 
-		if (tabla[x][y].aterrizaje || tabla[x][y].ataque_kamikaze) break; // Fin del recorrido.
+		if (flag_posiciones_transitadas[x][y]) {
+			// MSG_ERROR
+			cout << "Error: La celda ";
+			cout << "(" << x + 1 << ";" << y + 1 << ")";
+			cout << " es recorrida más de 1 vez." << endl;
+			return false;
+		}
+		flag_posiciones_transitadas[x][y] = true;
+		celdas_recorridas++;
 
-		siguiente_x = tabla[x][y].siguiente_x;
-		siguiente_y = tabla[x][y].siguiente_y;
-		x = siguiente_x;
-		y = siguiente_y;
+		if (pagina_tabla.aterrizaje || pagina_tabla.ataque_kamikaze) break; // Final del recorrido.
+
+		if (
+			pagina_tabla.siguiente_x >= TABLA_TAMANO_X 	||
+			pagina_tabla.siguiente_y >= TABLA_TAMANO_Y 	||
+			pagina_tabla.siguiente_x < 0 				||
+			pagina_tabla.siguiente_y < 0
+		) {
+			// MSG_ERROR
+			cout << "Error: La tabla intenta recorrer una o más celdas fuera de los límites de la tabla." << endl;
+			return false;
+		}
+		if (
+			!(pagina_tabla.siguiente_x == x 	&& pagina_tabla.siguiente_y == y - 1) 	&&	// Norte.
+			!(pagina_tabla.siguiente_x == x + 1 && pagina_tabla.siguiente_y == y) 		&&	// Este.
+			!(pagina_tabla.siguiente_x == x 	&& pagina_tabla.siguiente_y == y + 1) 	&&	// Sur.
+			!(pagina_tabla.siguiente_x == x - 1 && pagina_tabla.siguiente_y == y)			// Oeste.
+		) {
+			// MSG_ERROR
+			cout << "Error: La celda ";
+			cout << "(" << x + 1 << ";" << y + 1 << ")";
+			cout << " intenta recorrer una celda no adyacente." << endl;
+			return false;
+		}
+
+		x = pagina_tabla.siguiente_x;
+		y = pagina_tabla.siguiente_y;
 	}
 
 	if (celdas_recorridas != TABLA_TAMANO_X * TABLA_TAMANO_Y) {
@@ -79,243 +196,370 @@ bool recorridoTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], int despegue_x,
 
 
 bool validacionTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
-	int despegue_x = -1, despegue_y = -1;
+	unsigned int despegue_x = -1, despegue_y = -1;
+	bool flag_despegue = false;
+	bool flag_final = false;
+	bool flag_granada1 = false;
+	bool flag_granada2 = false;
+	Orden pagina_tabla;
 
+	// Reglas de validación:
+	// ✓ Tener exactamente 1 celda de despegue.
+	// ✓ Una celda de despegue no puede contener ninguna otra instrucción.
+	// ✓ Tener exactamente 1 celda de finalización (Aterrizaje o kamikaze).
+	// ✓ Ser recorrida en su totalidad desde la celda de despegue hasta la de finalización.
+	// ✓ Recorrer cada celda exactamente 1 vez.
+	// ✓ No recorrer celdas fuera de los limites.
+	// ✓ No recorrer celdas no adyacentes.
+	// ✓ Tener no más de 1 celda de granada 1 y 2.
 	for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
-		if (tabla[x][y].despegue) {
+		pagina_tabla = tabla[x][y];
+		if (pagina_tabla.despegue) {
+			if (flag_despegue) {
+				// MSG_ERROR
+				cout << "Error: La tabla contiene más de 1 celda de despegue." << endl;
+				return false;
+			}
+			if (
+				pagina_tabla.aterrizaje 		||
+				pagina_tabla.ataque_kamikaze 	||
+				pagina_tabla.soltar_granada1 	||
+				pagina_tabla.soltar_granada2
+			) {
+				// MSG_ERROR
+				cout << "Error: La celda de despegue contiene multiples instrucciones." << endl;
+				return false;
+			}
+			flag_despegue = true;
 			despegue_x = x;
 			despegue_y = y;
+		}
 
-			// TODO: Agregar el resto de validaciones.
+		if (pagina_tabla.aterrizaje) {
+			if (flag_final) {
+				// MSG_ERROR
+				cout << "Error: La tabla contiene más de 1 celda de aterrizaje o de ataque kamikaze." << endl;
+				return false;
+			}
+			flag_final = true;
+		}
+		if (pagina_tabla.ataque_kamikaze) {
+			if (flag_final) {
+				// MSG_ERROR
+				cout << "Error: La tabla contiene más de 1 celda de aterrizaje o de ataque kamikaze." << endl;
+				return false;
+			}
+			flag_final = true;
+		}
+
+		if (pagina_tabla.soltar_granada1) {
+			if (flag_granada1) {
+				// MSG_ERROR
+				cout << "Error: La tabla contiene más de 1 celda de granada nº1." << endl;
+				return false;
+			}
+			flag_granada1 = true;
+		}
+		if (pagina_tabla.soltar_granada2) {
+			if (flag_granada2) {
+				// MSG_ERROR
+				cout << "Error: La tabla contiene más de 1 celda de granada nº2." << endl;
+				return false;
+			}
+			flag_granada1 = true;
 		}
 	} }
+
+	if (!flag_despegue) {
+		// MSG_ERROR
+		cout << "Error: La tabla no contiene celda de despegue." << endl;
+		return false;
+	}
+	if (!flag_final) {
+		// MSG_ERROR
+		cout << "Error: La tabla no contiene celda de aterrizaje o de ataque kamikaze." << endl;
+		return false;
+	}
 	if (!recorridoTabla(tabla, despegue_x, despegue_y)) return false;
+
 	return true;
 }
 
 
-// Paso 1: Crear archivo.
-// Paso 2: Poblar tabla registro por registro.
-// Paso 3: Guardar tabla en archivo creado.
-void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
-	char respuesta = ' ';
-	bool flag_despegue 		= false; // Solo puede haber una celda de despegue por tabla.
-	bool flag_aterrizaje 	= false;
-	bool flag_kamikaze 		= false;
-	bool flag_granada1 		= false;
-	bool flag_granada2 		= false;
-	bool flag_posiciones_transitadas[TABLA_TAMANO_X][TABLA_TAMANO_Y] = {false};
+void poblarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], int x, int y, Flags &flags) {
+	char respuesta = '\0';
+	//
 	unsigned int respuesta_tiempo = 0;
 	unsigned int respuesta_x = 0, respuesta_y = 0;
 
-	// DEBUG ----
-	cout << "Tabla de " << TABLA_TAMANO_X << " ✕ " << TABLA_TAMANO_Y;
-	cout << "." << endl;
-	// ----------
+	// TODO: En caso de que 2 acciones sean incomptabiles, anularlas
+	// al momento de definir la contradictoria. Esto para que en caso
+	// de modificar un registro existente, no dejar valores
+	// contradictorios.
+	// Ej: Tengo una tabla con el aterrizaje en (2;1), y deseo
+	// posicionar ahí ahora el despegue, si yo modifico ese registro
+	// solo, sin este checkeo, podría darse la situación de dejar
+	// (2;1) con un despegue y aterrizaje en la misma celda.
+
+	// Despegue.
+	while (!flags.despegue) {
+		cout << "  ¿Despegue? [s/N]" << endl;
+		cout << "  " << CURSOR;
+		cin.get(respuesta);
+
+		switch (respuesta)
+		{
+			default:
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				cin.ignore(); // Leading whitespace.
+				continue;
+			case 's':
+			case 'S':
+					tabla[x][y].despegue = true;
+					flags.despegue = true;
+					tabla[x][y].aterrizaje = false;
+					tabla[x][y].ataque_kamikaze = false;
+					tabla[x][y].soltar_granada1 = false;
+					tabla[x][y].soltar_granada2 = false;
+					flags.posiciones_transitadas[x][y] = true;
+				break;
+			case 'n':
+			case 'N':
+			case '\n':
+					tabla[x][y].despegue = false;
+				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
+	}
+
+	// Aterrizaje.
+	while (
+		!flags.aterrizaje &&
+		!flags.kamikaze &&
+		!tabla[x][y].despegue
+	) {
+		cout << "  ¿Aterrizaje? [s/N]" << endl;
+		cout << "  " << CURSOR;
+		cin.get(respuesta);
+
+		switch (respuesta)
+		{
+			default:
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				cin.ignore(); // Leading whitespace.
+				continue;
+			case 's':
+			case 'S':
+				tabla[x][y].despegue = false;
+				tabla[x][y].aterrizaje = true;
+				tabla[x][y].ataque_kamikaze = false;
+				flags.aterrizaje = true;
+				break;
+			case 'n':
+			case 'N':
+			case '\n':
+				tabla[x][y].aterrizaje = false;
+				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
+	}
+
+	// Kamikaze.
+	while (
+		!flags.aterrizaje &&
+		!flags.kamikaze &&
+		!tabla[x][y].despegue
+	) {
+		cout << "  ¿Ataque kamikaze? [s/N]" << endl;
+		cout << "  " << CURSOR;
+		cin.get(respuesta);
+
+		switch (respuesta)
+		{
+			default:
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				cin.ignore(); // Leading whitespace.
+				continue;
+			case 's':
+			case 'S':
+				tabla[x][y].despegue = false;
+				tabla[x][y].aterrizaje = false;
+				tabla[x][y].ataque_kamikaze = true;
+				flags.kamikaze = true;
+				break;
+			case 'n':
+			case 'N':
+			case '\n':
+				tabla[x][y].ataque_kamikaze = false;
+				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
+	}
+
+	// Granada nº1.
+	while (
+		!flags.granada1 &&
+		!tabla[x][y].despegue
+	) {
+		cout << "  ¿Soltar granada nº1? [s/N]" << endl;
+		cout << "  " << CURSOR;
+		cin.get(respuesta);
+
+		switch (respuesta)
+		{
+			default:
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				cin.ignore(); // Leading whitespace.
+				continue;
+			case 's':
+			case 'S':
+				tabla[x][y].despegue = false;
+				tabla[x][y].soltar_granada1 = true;
+				flags.granada1 = true;
+				break;
+			case 'n':
+			case 'N':
+			case '\n':
+				tabla[x][y].soltar_granada1 = false;
+				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
+	}
+
+	// Granada nº2.
+	while (
+		!flags.granada2 &&
+		!tabla[x][y].despegue
+	) {
+		cout << "  ¿Soltar granada nº2? [s/N]" << endl;
+		cout << "  " << CURSOR;
+		cin.get(respuesta);
+
+		switch (respuesta)
+		{
+			default:
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				cin.ignore(); // Leading whitespace.
+				continue;
+			case 's':
+			case 'S':
+				tabla[x][y].despegue = false;
+				tabla[x][y].soltar_granada2 = true;
+				flags.granada2 = true;
+				break;
+			case 'n':
+			case 'N':
+			case '\n':
+				tabla[x][y].soltar_granada2 = false;
+				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
+	}
+
+	// Tiempo de espera.
+	while (true) {
+		cout << "  Tiempo de espera (Segundos)." << endl;
+		cout << "  " << CURSOR;
+		// FIXME: 16/10 Failsafe caracter en vez de número.
+		cin >> respuesta_tiempo;
+		// TODO: Consultar condición de invalidez de tiempo de espera.
+		// (Tiempo mínimo, máximo, etc).
+		tabla[x][y].espera = respuesta_tiempo;
+		break;
+	}
+
+	// Siguiente posición.
+	while (
+		!tabla[x][y].aterrizaje &&
+		!tabla[x][y].ataque_kamikaze
+	) {
+		cout << "  Posición siguiente (X;Y)." << endl;
+		cout << "  " << CURSOR;
+		// FIXME: 16/10 Failsafe caracter en vez de número.
+		cin >> respuesta_x;
+		cout << "  " << CURSOR;
+		// FIXME: 16/10 Failsafe caracter en vez de número.
+		cin >> respuesta_y;
+		// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
+		respuesta_x--;
+		respuesta_y--;
+	
+		// Esta condición es innecesaria, ya que la comprobación
+		// siguiente impide este caso también, pero tomé la decisión
+		// de contemplarlo igualmente para devolver un mensaje de
+		// alerta con mayor granuladidad.
+		if (
+			respuesta_x == x &&
+			respuesta_y == y
+		) {
+			// MSG_ERROR
+			cout << "Error: Ingrese una celda distinta de en la que se encuentra.";
+			cout << endl;
+			continue;
+		}
+	
+		if (
+			!(respuesta_x == x 		&& respuesta_y == y - 1) 	&&	// Norte.
+			!(respuesta_x == x + 1 	&& respuesta_y == y) 		&&	// Este.
+			!(respuesta_x == x 		&& respuesta_y == y + 1) 	&&	// Sur.
+			!(respuesta_x == x - 1 	&& respuesta_y == y)			// Oeste.
+		) {
+			// MSG_ERROR
+			cout << "Error: Seleccione una celda adyasente." << endl;
+			continue;
+		}
+	
+		if (
+			respuesta_x >= TABLA_TAMANO_X ||
+			respuesta_y >= TABLA_TAMANO_Y
+		) {
+			// MSG_ERROR
+			cout << "Error: Celda fuera de límites. Elija otra posición." << endl;
+			continue;
+		}
+	
+		if (flags.posiciones_transitadas[respuesta_x][respuesta_y]) {
+			// MSG_ERROR
+			cout << "Error: Celda ya transitada. Elija otra posición." << endl;
+			continue;
+		}
+	
+		tabla[x][y].siguiente_x = respuesta_x;
+		tabla[x][y].siguiente_y = respuesta_y;
+		flags.posiciones_transitadas[respuesta_x][respuesta_y] = true;
+		break;
+	}
+
+	cin.ignore(); // Leading whitespace.
+
+	return;
+}
+
+
+void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+	Flags flags;
+	cout << "# Tabla de " << TABLA_TAMANO_X << " ✕ " << TABLA_TAMANO_Y << "." << endl; // DEBUG ----
 	while (true) {
 		for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
-			cout << "Posición " << x + 1 << " ✕ " << y + 1 << ":" << endl;
-
-			// Un While por valor a introducir es una implementación un poco
-			// exagerada, pero como expliqué anteriormente, me da la flexibilidad
-			// de permitirle al usuario introducir un valor no válido y corregirlo
-			// antes de continuar con la ejecución.
-			// Cabe destacar también que en este caso se utiliza una disposición
-			// donde la función If es la que otorga la condición de salida del bucle,
-			// a diferencia de casos posteriores donde otorga la condición de permanencia.
-			// Esto es porque en este caso particular, la cantidad de valores válidos son
-			// limitados y determinables, donde los inválidos son indeterminables; a
-			// diferencia de casos posteriores donde los valores válidos son indeterminados
-			// mientras que los inválidos son determinados. Una manera de adaptar esta
-			// implementación es la de usar condiciones negativas (Ej: cuando la respuesta
-			// no sea 's' ni 'n'), pero se decidió de esta manera para evitar agregar ruido
-			// visual con Ifs de varias condiciones, que más tarde serían
-			// comparadas igualmente.
-
-			// Despegue
-			while (!flag_despegue) {
-				// TODO: Crear respuesta predeterminada
-				// (Ej: Presionar Enter sin llenar la entrada y que se asuma una opción válida).
-				cout << "  ¿Despegue? [s/n]" << endl;
-				cout << "  " << CURSOR;
-				cin >> respuesta;
-
-				if (respuesta == 's') {
-					tabla[x][y].despegue = true;
-					flag_despegue = true;
-					flag_posiciones_transitadas[x][y] = true;
-					break;
-				} else if (respuesta == 'n') {
-					tabla[x][y].despegue = false;
-					break;
-				}
-				// MSG_ERROR
-				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
-			}
-
-			// Aterrizaje
-			while (
-				!flag_aterrizaje &&
-				!flag_kamikaze &&
-				!tabla[x][y].despegue
-			) {
-				cout << "  ¿Aterrizaje? [s/n]" << endl;
-				cout << "  " << CURSOR;
-				cin >> respuesta;
-				if (respuesta == 's') {
-					tabla[x][y].aterrizaje = true;
-					flag_aterrizaje = true;
-					break;
-				} else if (respuesta == 'n') {
-					tabla[x][y].aterrizaje = false;
-					break;
-				}
-				// MSG_ERROR
-				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
-			}
-
-			// Kamikaze
-			while (
-				!flag_aterrizaje &&
-				!flag_kamikaze &&
-				!tabla[x][y].despegue
-			) {
-				cout << "  ¿Ataque kamikaze? [s/n]" << endl;
-				cout << "  " << CURSOR;
-				cin >> respuesta;
-				if (respuesta == 's') {
-					tabla[x][y].ataque_kamikaze = true;
-					flag_aterrizaje = true;
-					break;
-				} else if (respuesta == 'n') {
-					tabla[x][y].ataque_kamikaze = false;
-					break;
-				}
-				// MSG_ERROR
-				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
-			}
-
-			// Granada 1
-			while (
-				!flag_granada1 &&
-				!tabla[x][y].despegue
-			) {
-				cout << "  ¿Soltar granada nº1? [s/n]" << endl;
-				cout << "  " << CURSOR;
-				cin >> respuesta;
-				if (respuesta == 's') {
-					tabla[x][y].soltar_granada1 = true;
-					flag_granada1 = true;
-					break;
-				} else if (respuesta == 'n') {
-					tabla[x][y].soltar_granada1 = false;
-					break;
-				}
-				// MSG_ERROR
-				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
-			}
-
-			// Granada 2
-			while (
-				!flag_granada2 &&
-				!tabla[x][y].despegue
-			) {
-				cout << "  ¿Soltar granada nº2? [s/n]" << endl;
-				cout << "  " << CURSOR;
-				cin >> respuesta;
-				if (respuesta == 's') {
-					tabla[x][y].soltar_granada2 = true;
-					flag_granada2 = true;
-					break;
-				} else if (respuesta == 'n') {
-					tabla[x][y].soltar_granada2 = false;
-					break;
-				}
-				// MSG_ERROR
-				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
-			}
-
-			// Tiempo de espera
-			while (true) {
-				cout << "  Tiempo de espera (Segundos)." << endl;
-				cout << "  " << CURSOR;
-				// FIXME: 16/10 Failsafe caracter en vez de número.
-				cin >> respuesta_tiempo;
-				// TODO: Crear condiciones de invalidez.
-				tabla[x][y].espera = respuesta_tiempo;
-				break;
-			}
-
-			// Este es el caso de implementación alterna del que hablo más arriba.
-
-			// Siguiente posición
-			while (
-				!tabla[x][y].aterrizaje &&
-				!tabla[x][y].ataque_kamikaze
-			) {
-				cout << "  Posición siguiente [X ✕ Y]." << endl;
-				cout << "  " << CURSOR;
-				// FIXME: 16/10 Failsafe caracter en vez de número.
-				cin >> respuesta_x;
-				cout << "  " << CURSOR;
-				// FIXME: 16/10 Failsafe caracter en vez de número.
-				cin >> respuesta_y;
-				// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
-				respuesta_x--;
-				respuesta_y--;
-
-				// Esta condición es innecesaria, ya que la comprobación
-				// siguiente impide este caso también, pero tomé la decisión
-				// de contemplarlo igualmente para devolver un mensaje de
-				// alerta más adecuado.
-				if (
-					respuesta_x == x &&
-					respuesta_y == y
-				) {
-					// MSG_ERROR
-					cout << "Error: Ingrese una celda distinta de en la que se encuentra.";
-					cout << endl;
-					continue;
-				}
-
-				if (
-					!(respuesta_x == x 		&& respuesta_y == y - 1) 	&&	// Norte.
-					!(respuesta_x == x + 1 	&& respuesta_y == y) 		&&	// Este.
-					!(respuesta_x == x 		&& respuesta_y == y + 1) 	&&	// Sur.
-					!(respuesta_x == x - 1 	&& respuesta_y == y)			// Oeste.
-				) {
-					// MSG_ERROR
-					cout << "Error: Seleccione una celda adyasente." << endl;
-					continue;
-				}
-
-				if (
-					respuesta_x >= TABLA_TAMANO_X ||
-					respuesta_y >= TABLA_TAMANO_Y ||
-					respuesta_x < 0 ||
-					respuesta_y < 0
-				) {
-					// MSG_ERROR
-					cout << "Error: Celda fuera de límites. Elija otra posición." << endl;
-					continue;
-				}
-
-				if (flag_posiciones_transitadas[respuesta_x][respuesta_y]) {
-					// MSG_ERROR
-					cout << "Error: Celda ya transitada. Elija otra posición." << endl;
-					continue;
-				}
-
-				tabla[x][y].siguiente_x = respuesta_x;
-				tabla[x][y].siguiente_y = respuesta_y;
-				flag_posiciones_transitadas[respuesta_x][respuesta_y] = true;
-				break;
-			}
+			cout << "Posición (" << x + 1 << ";" << y + 1 << "):" << endl;
+			poblarRegistro(tabla, x, y, flags);
 		} }
 
 		if (!validacionTabla(tabla)) {
 			// MSG_ERROR
-			cout << "Error: La tabla de órdenes creada es inválida. Vuelva a crearla." << endl;
+			cout << "Error: La tabla de órdenes creada es inválida. Vuelva a crearla." << endl; 
+			// Este mensaje después de introducir 40 mil registros
+			// debe ser horrible, por decirlo de manera no bulgar.
 			continue;
 		}
 		break;
@@ -325,12 +569,92 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 }
 
 
-void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
-	FILE *archivo_ataque;
+void escribirArchivo(OrdenArchivo lista[TABLA_TAMANO_X * TABLA_TAMANO_Y]) {
 	char direccion_archivo[RUTA_MAX];
-	int tamaño_archivo = 0;
+	FILE *archivo_ataque = NULL;
+	char respuesta = '\0';
 
-	cout << "Por favor, indique ruta del archivo de ataque a cargar." << endl;
+	while (true) {
+		cout << "Por favor, indique ruta de guardado del ataque." << endl;
+		cout << CURSOR;
+		cin.getline(direccion_archivo, RUTA_MAX);
+		//cin >> direccion_archivo;
+
+
+		// Primero intento encontrar la dirección indicada en modo "r",
+		// de esta manera, si el archivo no existe, "archivo_ataque" queda
+		// como un puntero NULL, accediendo nuevamente pero en modo "w+b".
+		// Pero en caso de que exista, para evitar una sobreescritura
+		// accidental, se pregunta al usuario como desea continuar.
+		archivo_ataque = fopen(direccion_archivo, "r");
+		if (archivo_ataque != NULL) { // Existe el archivo.
+			fclose(archivo_ataque);
+			archivo_ataque = NULL;
+			// MSG_ERROR
+			cout << "  Error: El archivo ya existe. ¿Desea sobreescribirlo? [s/N]" << endl;
+			while (true)
+			{
+				cout << "  " << CURSOR;
+				cin.get(respuesta);
+				if (
+					respuesta == 's' ||
+					respuesta == 'S'
+				) {
+					if (!(archivo_ataque = fopen(direccion_archivo, "w+b"))) {
+						// MSG_ERROR
+						cout << "  Error: No se pudo sobreescribir el archivo." << endl;
+						archivo_ataque = NULL;
+						break; // "archivo_ataque" == NULL.
+					}
+					break; // "archivo_ataque" != NULL.
+				} else if (
+					respuesta == 'n' ||
+					respuesta == 'N' ||
+					respuesta == '\n'
+				) {
+					break; // "archivo_ataque" == NULL.
+				} else {
+					// MSG_ERROR
+					cout << "  Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+					cin.ignore(); // Leading whitespace.
+					continue;
+				}
+			}
+			if (archivo_ataque == NULL) continue;
+		} else {
+			archivo_ataque = fopen(direccion_archivo, "w+b");
+		}
+		break;
+	}
+
+	cout << "Guardando tabla de órdenes en ";
+	cout << "\"" << direccion_archivo << "\"";
+	cout << "..." << endl;
+
+	fseek(archivo_ataque, 0, SEEK_SET);
+	if (!fwrite(lista, sizeof(OrdenArchivo), TABLA_TAMANO_X * TABLA_TAMANO_Y, archivo_ataque)) {
+		// MSG_ERROR
+		cout << "Error: Error al guardar la tabla en ";
+		cout << "\"" << direccion_archivo << "\"" << endl;
+		cout << ". Puede que el archivo se haya movido o borrado. Vuelva a intentarlo." << endl;
+	} else {
+		cout << "¡Archivo guardado exitosamente!" << endl;
+	}
+	fclose(archivo_ataque);
+
+	return;
+}
+
+
+void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
+	char direccion_archivo[RUTA_MAX];
+	FILE *archivo_ataque;
+	int tamaño_archivo = 0;
+	OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y];
+
+	flag_tabla_cargada = false;
+
+	cout << "Por favor, indique ruta del archivo de ataque." << endl;
 	// Acá estoy usando un While de una manera particular. Generalmente le pone una condición de
 	// salida y se comprueba cada loop, y se utilizan sentencias selectivas para lograr
 	// dicha condición de salida. En este caso ocurre lo contrario. No hay condición de salida
@@ -340,12 +664,8 @@ void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_
 	// salida en sentencias If de manera clara.
 	while (true) {
 		cout << CURSOR;
-
-		// Se utiliza getline en vez de cin para poder incluir espacios
-		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
 		// FIXME: 16/10 Detección de tecla Esc para salir.
 		// FIXME: 16/10 Detección flechas para moverse al introducir texto.
-		cin.getline(direccion_archivo, RUTA_MAX);
 		cin.getline(direccion_archivo, RUTA_MAX);
 		//cin >> direccion_archivo;
 
@@ -354,41 +674,37 @@ void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_
 			cout << "Error: La dirección del archivo ingresada es inválida o el archivo no existe. ";
 			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
 			continue; // Vuelve a empezar el loop while.
-		}	
+		}
 
-		cout << "Dirección de archivo válida." << endl;
 		fseek(archivo_ataque, 0, SEEK_END);
-		// FIXME: 16/10 Cambiar tamaño de Orden a OrdenArchivo.
-		tamaño_archivo = ftell(archivo_ataque) / sizeof(Orden); // Tamaño del archivo en casilleros.
+		tamaño_archivo = ftell(archivo_ataque) / sizeof(OrdenArchivo); // Tamaño del archivo en celdas.
 		if (tamaño_archivo != TABLA_TAMANO_X * TABLA_TAMANO_Y) {
 			// MSG_ERROR
 			cout << "Error: El archivo cargado tiene un tamaño invalido. ";
 			cout << "Por favor, ingrese un archivo de ataque válido." << endl;
-			continue;
-		}	
-		
-		cout << "Cargando archivo de ataque a memoria..." << endl;
-
-		// FIXME: 16/10 Cambiar tipo de prototipo de variable a guardar de Orden a OrdenArchivo.
-		// e integrar sistema correspondiente de adaptación.
-		fseek(archivo_ataque, 0, SEEK_SET);
-		fread(
-			tabla,
-			sizeof(Orden),
-			TABLA_TAMANO_X * TABLA_TAMANO_Y,
-			archivo_ataque
-		);
-		if (!validacionTabla(tabla)) {
-			// MSG_ERROR
-			cout << "Error: El archivo ingresado contiene una o más instrucciones inválidas." << endl;
+			fclose(archivo_ataque);
 			continue;
 		}
 
-		break;
-	};
+		cout << "Cargando archivo de ataque..." << endl;
 
-	flag_tabla_cargada = true;
+		fseek(archivo_ataque, 0, SEEK_SET);
+		fread(lista_archivo, sizeof(OrdenArchivo), tamaño_archivo, archivo_ataque);
+		archivoATabla(lista_archivo, tabla);
+
+		if (!validacionTabla(tabla)) {
+			// MSG_ERROR
+			cout << "Error: El archivo ingresado contiene una o más instrucciones inválidas." << endl;
+			fclose(archivo_ataque);
+			continue;
+		}
+
+		cout << "¡Archivo cargado exitosamente!" << endl;
+		break;
+	}
 	fclose(archivo_ataque);
+	flag_tabla_cargada = true;
+
 	return;
 }
 
@@ -398,175 +714,203 @@ void cargarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_
 // la creación del archivo en donde se almacenará. Para interactuar con
 // el resto de funciones, como "mostrarAtaque()", por ejemplo, se debe
 // cargar como cualquier otro archivo.
-void crearArchivo() {
-	char direccion_archivo[RUTA_MAX];
-	FILE *archivo_ataque;
+void crearAtaque() {
 	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y];
-	//OrdenArchivo tabla_archivo[TABLA_TAMANO_X][TABLA_TAMANO_Y];
-
-	cout << "Por favor, indique ruta de guardado del ataque." << endl;
-	while (true) {
-		cout << CURSOR;
-		// Se utiliza getline en vez de cin para poder incluir espacios
-		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
-		// FIXME: 16/10 Detección de tecla Esc para salir.
-		// FIXME: 16/10 Detección flechas para moverse al introducir texto.
-		cin.getline(direccion_archivo, RUTA_MAX);
-		cin.getline(direccion_archivo, RUTA_MAX);
-		//cin >> direccion_archivo;
-
-		// Flag 'x' al modo para evitar la sobreescritura.
-		// TODO: Opción de sobreescribir.
-		if ( !(archivo_ataque = fopen(direccion_archivo, "w+bx")) ) {
-			// MSG_ERROR
-			cout << "Error: La dirección del archivo ingresada es inválida o el archivo ya existe. ";
-			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
-			continue; // Vuelve a empezar el loop while.
-		}
-		break;
-	};
+	OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y];
 
 	poblarArchivo(tabla);
-	cout << "Guardando tabla de órdenes en ";
-	cout << "\"" << direccion_archivo << "\"";
-	cout << "..." << endl;
-
-	// FIXME: 16/10 Cambiar a OrdenArchivo, no Orden.
-	if (
-		!fwrite(
-			tabla,
-			sizeof(Orden),
-			TABLA_TAMANO_X * TABLA_TAMANO_Y,
-			archivo_ataque
-		)
-	) {
-		// MSG_ERROR
-		cout << "Error: Error al guardar la tabla en ";
-		cout << "\"" << direccion_archivo << "\"" << endl;
-		cout << ". Puede que el archivo se haya movido o borrado. Vuelva a intentarlo." << endl;
-	} else {
-		cout << "¡Guardado de archivo exitoso!" << endl;
-	}
-
-	fclose(archivo_ataque);
+	tablaAArchivo(lista_archivo, tabla);
+	escribirArchivo(lista_archivo);
 
 	return;
 }
 
-// TODO: Deindividualizar y proceduralizar función compartida de carga de archivo con "cargarArchivo()"
+
 void guardarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
-	if (!flag_tabla_cargada) {
-		// MSG_ERROR
-		cout << "Error: No hay una tabla de órdenes cargada. ";
-		cout << "Cargue o cree una tabla primero para poder guardarla." << endl;
-		return;
-	}
+	OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y];
 
-	char direccion_archivo[RUTA_MAX];
-	FILE *archivo_ataque;
-
-	cout << "Por favor, indique ruta de guardado del ataque." << endl;
-	while (true) {
-		cout << CURSOR;
-		// Se utiliza getline en vez de cin para poder incluir espacios
-		// en la ruta del archivo. Se usan 2 para evitar un error de leading whitespace.
-		cin.getline(direccion_archivo, RUTA_MAX);
-		cin.getline(direccion_archivo, RUTA_MAX);
-		//cin >> direccion_archivo;
-
-		// Flag 'x' al modo para evitar la sobreescritura.
-		// TODO: Opción de sobreescribir.
-		if (!(archivo_ataque = fopen(direccion_archivo, "w+bx"))) {
-			// MSG_ERROR
-			cout << "Error: La dirección del archivo ingresada es inválida o el archivo ya existe. ";
-			cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
-			continue; // Vuelve a empezar el loop while.
-		}	
-
-		break;
-	};	
-
-	cout << "Guardando ataque..." << endl;
-	// FIXME: 16/10 Cargar a OrdenArchivo, no Orden.
-	fwrite(
-		tabla,
-		sizeof(Orden),
-		TABLA_TAMANO_X * TABLA_TAMANO_Y,
-		archivo_ataque
-	);
-	cout << "Archivo guardado." << endl;
-	fclose(archivo_ataque);
+	tablaAArchivo(lista_archivo, tabla);
+	escribirArchivo(lista_archivo);
+	flag_tabla_cargada = false;
 
 	return;
 }
 
 
-void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
-	if (!flag_tabla_cargada) {
-		// MSG_ERROR
-		cout << "Error: No hay una tabla de órdenes cargada. ";
-		cout << "Cargue o cree una tabla primero para poder visualizarla." << endl;
-		return;
+void mostrarRegistro(Orden registro, int x, int y) {
+	// Un poquito de diseño de tui.
+	cout << "┌─────────────────────────────────────┐" << endl;
+
+	cout << "│ " << "Posición actual (X;Y):        ";
+	cout << "(" << x + 1 << ";" << y + 1 << ")" << endl;
+
+	cout << "│ " << "Despegue:                  ";
+	cout << (registro.despegue ? "Veradero" : "   Falso") << endl;
+	// Operador ternario para redibilidad
+
+	cout << "│ " << "Aterrizaje:                ";
+	cout << (registro.aterrizaje ? "Veradero" : "   Falso") << endl;
+
+	cout << "│ " << "Soltar granada nº1:        ";
+	cout << (registro.soltar_granada1  ? "Veradero" : "   Falso") << endl;
+
+	cout << "│ " << "Soltar granada nº2:        ";
+	cout << (registro.soltar_granada2 ? "Veradero" : "   Falso") << endl;
+
+	cout << "│ " << "Ataque kamikaze:           ";
+	cout << (registro.ataque_kamikaze ? "Veradero" : "   Falso") << endl;
+
+	cout << "│ " <<  "Espera [Segundos]:              ";
+	cout << registro.espera << " s" << endl;
+
+	cout << "│ " << "Posición siguiente (X;Y):     ";
+	if (registro.aterrizaje || registro.ataque_kamikaze) cout << "Final";
+	else cout << "(" << registro.siguiente_x + 1 << ";" << registro.siguiente_y + 1 << ")";
+	cout << endl;
+	// Se le suma 1 a las coordenadas para volverlas amistosas para el usuario.
+	// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
+
+	cout << "└─ Presione Enter para continuar... ──┘" << endl;
+
+	cin.ignore(); // Presione Enter para continuar.
+};
+
+
+void mostrarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+	for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
+		mostrarRegistro(tabla[x][y], x, y);
+	} }
+
+	return;
+}
+
+
+void modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+	int respuesta_x = 0, respuesta_y = 0;
+	char respuesta = '\0';
+	Orden tabla_nueva[TABLA_TAMANO_X][TABLA_TAMANO_Y];
+	Flags flags;
+
+	clonarTabla(tabla, tabla_nueva);
+
+	while (true) {
+		while (true) {
+			cout << "¿Qué registro desea modificar? (X;Y)" << endl;
+			cout << "  " << CURSOR;
+			// FIXME: 16/10 Failsafe caracter en vez de número.
+			cin >> respuesta_x;
+			cout << "  " << CURSOR;
+			// FIXME: 16/10 Failsafe caracter en vez de número.
+			cin >> respuesta_y;
+			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
+			respuesta_x--;
+			respuesta_y--;
+	
+			if (
+				respuesta_x >= TABLA_TAMANO_X ||
+				respuesta_y >= TABLA_TAMANO_Y
+			) {
+				// MSG_ERROR
+				cout << "Error: Celda fuera de límites. Elija otra posición." << endl;
+				continue;
+			}
+			cin.ignore(); // Leading whitespace.
+
+			break;
+		}
+		// validarTabla y obtener flags correctas
+		poblarRegistro(tabla_nueva, respuesta_x, respuesta_y, flags);
+		cout << endl << "Resultado:" << endl;
+		mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
+
+		while (true) {
+			cout << "¿Guardar cambios? [S/n]" << endl;
+			cout << "  " << CURSOR;
+			cin.get(respuesta);
+	
+			switch (respuesta)
+			{
+				default:
+					// MSG_ERROR
+					cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+					cin.ignore(); // Leading whitespace.
+					continue;
+				case 's':
+				case 'S':
+				case '\n':
+					// TODO: Validar cambios.
+					cout << "Validando cambios..." << endl; // DEBUG ----
+					if (!validacionTabla(tabla_nueva)) {
+						// MSG_ERROR
+						cout << "Error: Las modificaciones hechas a la tabla son inválidas.";
+						cout << " Deshaciendo los cambios." << endl;
+						clonarTabla(tabla, tabla_nueva);
+						break;
+					}
+					cout << "Cambios validados. Todo en orden." << endl; // DEBUG ----
+					clonarTabla(tabla_nueva, tabla);
+					break;
+				case 'n':
+				case 'N':
+					clonarTabla(tabla, tabla_nueva);
+					cout << "Se han deshecho los cambios." << endl;
+					break;
+			}
+			if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+			break;
+		}
+		cout << "¿Hacer más cambios? [s/N]" << endl;
+		cout << "  " << CURSOR;
+		cin.get(respuesta);
+
+		// TODO: revisar esto
+		switch (respuesta)
+		{
+			default:
+				// MSG_ERROR
+				//cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				//cin.ignore(); // Leading whitespace.
+				//continue;
+			case 's':
+			case 'S':
+				continue; // idk
+			case 'n':
+			case 'N':
+			case '\n':
+				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
 	}
 
-	Orden pagina_tabla;
+	return;
+}
 
-	// Procedimiento para evitar leading whitespace al seleccionar esta opción.
-	cin.get();
 
-	for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
-		pagina_tabla = tabla[x][y];
+void modificarArchivo() {
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y];
+	OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y];
 
-		// Un poquito de diseño de tui.
-		cout << "┌─────────────────────────────────────┐" << endl;
+	// cargarArchivo
+	archivoATabla(lista_archivo, tabla);
+	modificarRegistro(tabla);
+	tablaAArchivo(lista_archivo, tabla);
+	escribirArchivo(lista_archivo); // "escribirArchivo()" no funciona así. Hay que corregirlo.
 
-		cout << "│ " << "Despegue:                  ";
-		cout << (pagina_tabla.despegue ? "Veradero" : "   Falso") << endl;
-		// Operador ternario para redibilidad
-
-		cout << "│ " << "Aterrizaje:                ";
-		cout << (pagina_tabla.aterrizaje ? "Veradero" : "   Falso") << endl;
-
-		cout << "│ " << "Soltar granada nº1:        ";
-		cout << (pagina_tabla.soltar_granada1  ? "Veradero" : "   Falso") << endl;
-
-		cout << "│ " << "Soltar granada nº2:        ";
-		cout << (pagina_tabla.soltar_granada2 ? "Veradero" : "   Falso") << endl;
-
-		cout << "│ " << "Ataque kamikaze:           ";
-		cout << (pagina_tabla.ataque_kamikaze ? "Veradero" : "   Falso") << endl;
-
-		cout << "│ " <<  "Espera [Segundos]:           ";
-		// TODO: Agregar sistema de formato.
-		// (Desplazar cierta cantidad de espacios para que quede anclado a la derecha
-		// dependiendo del tamaño del número de segundos).
-		cout << pagina_tabla.espera << " s" << endl;
-
-		cout << "│ " << "Posición siguiente [X ✕ Y]: ";
-		cout << pagina_tabla.siguiente_x + 1 << " ✕ " << pagina_tabla.siguiente_y + 1 << endl;
-		// Se le suma 1 a las coordenadas para volverlas amistosas para el usuario.
-		// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
-
-		cout << "│ " << "Posición actual [X ✕ Y]:    ";
-		cout << x + 1 << " ✕ " << y + 1 << endl;
-		cout << "└─ Presione Enter para continuar... ──┘" << endl;
-
-		cin.get();
-	} }
 	return;
 }
 
 
 void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_cargada) {
-	int eleccion = 0;
+	int eleccion = -1;
 
 	do {
 		// Con esta comparación se evita reimprimir el menú si
 		// la opción ingresada es incorrecta, pero sí si se
 		// acaba de salir de una opción real luego de utilizarla.
 		if (eleccion < 7) {
+			cout << endl;
 			cout << "Menú de opciones de control de memoria del dron." << endl;
-			//cout << endl;
 			cout << "Por favor, selecciones una de las siguientes opciones: (ej: 1, 2, 3)" << endl;
 			cout << "  [1]. Cargar archivo de ataque a memoria." << endl;
 			cout << "  [2]. Mostrar archivo cargado." << endl;
@@ -581,6 +925,11 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 		cout << CURSOR;
 		// FIXME: 16/10 Failsafe para caracter en vez de número.
 		cin >> eleccion;
+
+		// Se utiliza cin.ignore() para prevenir error de leading whitespace al presionar Enter.
+		// Este comportamiento se puede obtener utilizando cin.get(), pero se decidió por
+		// usar cin.ignore() ya que el valor obtenido no va a ser almacenado.
+		cin.ignore();
 		switch (eleccion) {
 			default:
 				// MSG_ERROR
@@ -593,18 +942,21 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 				cargarAtaque(tabla, flag_tabla_cargada);
 				break;
 			case 2: // Mostrar archivo cargado.
-				mostrarAtaque(tabla, flag_tabla_cargada);
+				if (tablaCargada(flag_tabla_cargada)) break;
+				mostrarAtaque(tabla);
 				break;
-			case 3: // Crear archivo de ataque nuevo y poblarlo
-				crearArchivo();
+			case 3: // Crear archivo de ataque nuevo y poblarlo.
+				crearAtaque();
 				break;
-			case 4:
-				cout << "Opción 4." << endl;
+			case 4: // Modificar tabla en archivo.
+				//modificarArchivo(); // Terminar funcionamiento antes de implementar.
 				break;
-			case 5:
-				cout << "Opción 5." << endl;
+			case 5: // Modificar tabla en memoria.
+				if (tablaCargada(flag_tabla_cargada)) break;
+				modificarRegistro(tabla);
 				break;
 			case 6: // Guardar archivo de ataque.
+				if (tablaCargada(flag_tabla_cargada)) break;
 				guardarAtaque(tabla, flag_tabla_cargada);
 				break;
 			case 7:
@@ -612,6 +964,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 				break;
 		}
 	} while (eleccion != 0);
+
 	return;
 }
 
