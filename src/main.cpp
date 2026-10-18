@@ -288,18 +288,10 @@ bool validacionTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 void poblarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], int x, int y, Flags &flags) {
 	char respuesta = '\0';
-	//
-	unsigned int respuesta_tiempo = 0;
+		unsigned int respuesta_tiempo = 0;
 	unsigned int respuesta_x = 0, respuesta_y = 0;
 
-	// TODO: En caso de que 2 acciones sean incomptabiles, anularlas
-	// al momento de definir la contradictoria. Esto para que en caso
-	// de modificar un registro existente, no dejar valores
-	// contradictorios.
-	// Ej: Tengo una tabla con el aterrizaje en (2;1), y deseo
-	// posicionar ahí ahora el despegue, si yo modifico ese registro
-	// solo, sin este checkeo, podría darse la situación de dejar
-	// (2;1) con un despegue y aterrizaje en la misma celda.
+	cout << "Posición (" << x + 1 << ";" << y + 1 << "):" << endl;
 
 	// Despegue.
 	while (!flags.despegue) {
@@ -551,8 +543,7 @@ void poblarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	cout << "# Tabla de " << TABLA_TAMANO_X << " ✕ " << TABLA_TAMANO_Y << "." << endl; // DEBUG ----
 	while (true) {
 		for (int y = 0; y < TABLA_TAMANO_Y; y++) { for (int x = 0; x < TABLA_TAMANO_X; x++) {
-			cout << "Posición (" << x + 1 << ";" << y + 1 << "):" << endl;
-			poblarRegistro(tabla, x, y, flags);
+						poblarRegistro(tabla, x, y, flags);
 		} }
 
 		if (!validacionTabla(tabla)) {
@@ -594,7 +585,7 @@ void escribirArchivo(OrdenArchivo lista[TABLA_TAMANO_X * TABLA_TAMANO_Y]) {
 			cout << "  Error: El archivo ya existe. ¿Desea sobreescribirlo? [s/N]" << endl;
 			while (true)
 			{
-				cout << "  " << CURSOR;
+				cout << CURSOR;
 				cin.get(respuesta);
 				if (
 					respuesta == 's' ||
@@ -770,7 +761,7 @@ void mostrarRegistro(Orden registro, int x, int y) {
 	// Se le suma 1 a las coordenadas para volverlas amistosas para el usuario.
 	// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
 
-	cout << "└─ Presione Enter para continuar... ──┘" << endl;
+	cout << "└─ Presione Enter para continuar... ──┘ ";
 
 	cin.ignore(); // Presione Enter para continuar.
 };
@@ -789,17 +780,19 @@ void modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	int respuesta_x = 0, respuesta_y = 0;
 	char respuesta = '\0';
 	Orden tabla_nueva[TABLA_TAMANO_X][TABLA_TAMANO_Y];
-	Flags flags;
+	Flags flags; // FIXME: ???
 
+// Para poder anular los cambios en caso de que sean inválidos.
 	clonarTabla(tabla, tabla_nueva);
 
 	while (true) {
-		while (true) {
+
+		while (true) { // Qué registro.
 			cout << "¿Qué registro desea modificar? (X;Y)" << endl;
-			cout << "  " << CURSOR;
+			cout << CURSOR;
 			// FIXME: 16/10 Failsafe caracter en vez de número.
 			cin >> respuesta_x;
-			cout << "  " << CURSOR;
+			cout << CURSOR;
 			// FIXME: 16/10 Failsafe caracter en vez de número.
 			cin >> respuesta_y;
 			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
@@ -818,52 +811,18 @@ void modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 			break;
 		}
-		// validarTabla y obtener flags correctas
+
+		cout << "Registro original:" << endl;
+		mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
+		// TODO: recorrer tabla y obtener flags correctas
 		poblarRegistro(tabla_nueva, respuesta_x, respuesta_y, flags);
 		cout << endl << "Resultado:" << endl;
 		mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
 
-		while (true) {
-			cout << "¿Guardar cambios? [S/n]" << endl;
-			cout << "  " << CURSOR;
-			cin.get(respuesta);
-	
-			switch (respuesta)
-			{
-				default:
-					// MSG_ERROR
-					cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
-					cin.ignore(); // Leading whitespace.
-					continue;
-				case 's':
-				case 'S':
-				case '\n':
-					// TODO: Validar cambios.
-					cout << "Validando cambios..." << endl; // DEBUG ----
-					if (!validacionTabla(tabla_nueva)) {
-						// MSG_ERROR
-						cout << "Error: Las modificaciones hechas a la tabla son inválidas.";
-						cout << " Deshaciendo los cambios." << endl;
-						clonarTabla(tabla, tabla_nueva);
-						break;
-					}
-					cout << "Cambios validados. Todo en orden." << endl; // DEBUG ----
-					clonarTabla(tabla_nueva, tabla);
-					break;
-				case 'n':
-				case 'N':
-					clonarTabla(tabla, tabla_nueva);
-					cout << "Se han deshecho los cambios." << endl;
-					break;
-			}
-			if (respuesta != '\n') cin.ignore(); // Leading whitespace.
-			break;
-		}
-		cout << "¿Hacer más cambios? [s/N]" << endl;
-		cout << "  " << CURSOR;
+		cout << "¿Cambiar otro registro? [s/N]" << endl;
+		cout << CURSOR;
 		cin.get(respuesta);
 
-		// TODO: revisar esto
 		switch (respuesta)
 		{
 			default:
@@ -878,6 +837,42 @@ void modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 			case 'N':
 			case '\n':
 				break;
+		}
+		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+		break;
+	}
+
+	while (true) { // Guardar cambios.
+			cout << "¿Guardar cambios? [S/n]" << endl;
+		cout << CURSOR;
+			cin.get(respuesta);
+	
+			switch (respuesta)
+			{
+				default:
+					// MSG_ERROR
+					cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+					cin.ignore(); // Leading whitespace.
+					continue;
+				case 's':
+				case 'S':
+				case '\n':
+										cout << "Validando cambios..." << endl; // DEBUG ----
+					if (!validacionTabla(tabla_nueva)) {
+						// MSG_ERROR
+						cout << "Error: Las modificaciones hechas a la tabla son inválidas.";
+						cout << " Deshaciendo los cambios." << endl;
+						clonarTabla(tabla, tabla_nueva);
+						break;
+					}
+					cout << "Cambios validados. Todo en orden." << endl; // DEBUG ----
+					clonarTabla(tabla_nueva, tabla);
+					break;
+				case 'n':
+				case 'N':
+					clonarTabla(tabla, tabla_nueva);
+					cout << "Se han deshecho los cambios." << endl;
+									break;
 		}
 		if (respuesta != '\n') cin.ignore(); // Leading whitespace.
 		break;
