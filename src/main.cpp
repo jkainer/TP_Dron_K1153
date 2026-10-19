@@ -472,10 +472,14 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 	while (true) {
 		cout << "  Tiempo de espera (Segundos)." << endl;
 		cout << "  " << CURSOR;
-		// FIXME: 16/10 Failsafe caracter en vez de número.
 		cin >> respuesta_tiempo;
-		// TODO: Consultar condición de invalidez de tiempo de espera.
-		// (Tiempo mínimo, máximo, etc).
+		if (!cin) { // En caso de ingresar un caracter en vez de un número.
+			cin.clear();
+			cin.ignore();
+			// MSG_ERROR
+			cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+			continue;
+		}
 		registro.espera = respuesta_tiempo;
 		break;
 	}
@@ -486,15 +490,27 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 		!registro.ataque_kamikaze
 	) {
 		cout << "  Posición siguiente (X;Y)." << endl;
-		cout << "  " << CURSOR;
-		// FIXME: 16/10 Failsafe caracter en vez de número.
+		cout << "  X: ";
 		cin >> respuesta_x;
-		cout << "  " << CURSOR;
-		// FIXME: 16/10 Failsafe caracter en vez de número.
+		if (!cin) { // En caso de ingresar un caracter en vez de un número.
+			cin.clear();
+			cin.ignore();
+			// MSG_ERROR
+			cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+			continue;
+		}
+		cout << "  Y: ";
 		cin >> respuesta_y;
-		// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
+		if (!cin) { // En caso de ingresar un caracter en vez de un número.
+			cin.clear();
+			cin.ignore();
+			// MSG_ERROR
+			cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+			continue;
+		}
 		respuesta_x--;
 		respuesta_y--;
+		// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
 	
 		if (
 			!(respuesta_x == x 		&& respuesta_y == y - 1) 	&&	// Norte.
@@ -634,8 +650,6 @@ void cargarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla
 	// salida en sentencias If de manera clara.
 	while (true) {
 		cout << CURSOR;
-		// FIXME: 16/10 Detección de tecla Esc para salir.
-		// FIXME: 16/10 Detección flechas para moverse al introducir texto.
 		cin.getline(direccion_archivo, RUTA_MAX);
 		//cin >> direccion_archivo;
 
@@ -677,6 +691,7 @@ void cargarArchivo(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla
 
 	return;
 }
+
 
 void escribirArchivo(OrdenArchivo lista[TABLA_TAMANO_X * TABLA_TAMANO_Y]) {
 	char direccion_archivo[RUTA_MAX];
@@ -804,15 +819,27 @@ void modificarRegistroDeTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	do {
 		while (true) { // Qué registro.
 			cout << "¿Qué registro desea modificar? (X;Y)" << endl;
-			cout << CURSOR;
-			// FIXME: 16/10 Failsafe caracter en vez de número.
+			cout << "  X: ";
 			cin >> respuesta_x;
-			cout << CURSOR;
-			// FIXME: 16/10 Failsafe caracter en vez de número.
+			if (!cin) { // En caso de ingresar un caracter en vez de un número.
+				cin.clear();
+				cin.ignore();
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				continue;
+			}
+			cout << "  Y: ";
 			cin >> respuesta_y;
-			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
+			if (!cin) { // En caso de ingresar un caracter en vez de un número.
+				cin.clear();
+				cin.ignore();
+				// MSG_ERROR
+				cout << "Error: Respuesta no valida. Vuelva a intentarlo." << endl;
+				continue;
+			}
 			respuesta_x--;
 			respuesta_y--;
+			// (Se interpreta que la tabla comienza en 1x1 y no en 0x0).
 	
 			if (
 				respuesta_x >= TABLA_TAMANO_X ||
@@ -911,8 +938,6 @@ void modificarRegistroDeArchivo() { // FIXME: ayuda
 	cout << "Por favor, indique ruta del archivo de ataque." << endl;
 	while (true) { // Cargar archivo.
 		cout << CURSOR;
-		// FIXME: 16/10 Detección de tecla Esc para salir.
-		// FIXME: 16/10 Detección flechas para moverse al introducir texto.
 		cin.getline(direccion_archivo, RUTA_MAX);
 		//cin >> direccion_archivo;
 
@@ -969,6 +994,16 @@ void modificarRegistroDeArchivo() { // FIXME: ayuda
 // ──────────────────────────────────────────────────
 
 
+// ───────────────────── HTML ───────────────────────
+
+void crearHTML(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+
+	return;
+}
+
+// ──────────────────────────────────────────────────
+
+
 // ──────────────── Menú principal ──────────────────
 
 // Imprime un error y retorna "false" cuando no hay una tabla de
@@ -993,7 +1028,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 		// Con esta comparación se evita reimprimir el menú si
 		// la opción ingresada es incorrecta, pero sí si se
 		// acaba de salir de una opción real luego de utilizarla.
-		if (eleccion < 7) {
+		if (eleccion < 8) {
 			cout << endl;
 			cout << "Menú de opciones de control de memoria del dron." << endl;
 			cout << "Por favor, selecciones una de las siguientes opciones: (ej: 1, 2, 3)" << endl;
@@ -1008,8 +1043,12 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 		}
 
 		cout << CURSOR;
-		// FIXME: 16/10 Failsafe para caracter en vez de número.
 		cin >> eleccion;
+		if (!cin) { // En caso de ingresar un caracter en vez de un número.
+			cin.clear();
+			cin.ignore();
+			eleccion = 8;
+		}
 
 		// Se utiliza cin.ignore() para prevenir error de leading whitespace al presionar Enter.
 		// Este comportamiento se puede obtener utilizando cin.get(), pero se decidió por
@@ -1044,8 +1083,9 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 				if (!comprobarTablaCargada(flag_tabla_cargada)) break;
 				guardarAtaque(tabla, flag_tabla_cargada);
 				break;
-			case 7:
-				cout << "Opción 7." << endl;
+			case 7: // Crear página HTML.
+				if (!comprobarTablaCargada(flag_tabla_cargada)) break;
+				crearHTML(tabla);
 				break;
 		}
 	} while (eleccion != 0);
