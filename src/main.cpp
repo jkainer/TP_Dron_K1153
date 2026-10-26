@@ -996,8 +996,226 @@ void modificarRegistroDeArchivo() { // FIXME: ayuda
 
 // ───────────────────── HTML ───────────────────────
 
-void crearHTML(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+void crearHTML(
+	Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y],
+	int despegue_x, int despegue_y
+) {
+	FILE *archivo;
+	archivo = fopen("index.htm", "w");
 
+	int x = despegue_x, y = despegue_y;
+	Orden registro, registro_siguiente;
+	bool norte = false, sur = false, este = false, oeste = false;
+	bool norte_siguiente = false, sur_siguiente = false, este_siguiente = false, oeste_siguiente = false;
+	const char* char_registro[TABLA_TAMANO_X][TABLA_TAMANO_Y] = { "\0" }; // Wide char para almacenar unicode.
+
+	fprintf(archivo, R"(
+<html>
+	<head>
+	<title>Nombre del archivo - TP Dron</title>
+	</head>
+	<body>
+	<div class="main">
+		<header width="100%">
+		<h1>Vista previa de la tabla de órdenes del dron.</h1>
+		<h2>Dirección del archivo: /direccion/del/archivo.file</h2>
+		</header>
+		<hr width="100%"/>
+		<div style="display: flex; gap: 10px;">
+			<div class="border">
+			<div class="scrollable">
+			<table class="table">
+				<thead>
+				<th><div class="content"></div></th>)");
+	for (int x = 0; x < TABLA_TAMANO_X; x++) {
+		fprintf(archivo, "\n\t\t\t<th><div class=\"content\">%d</div></th>", x + 1); // Columna
+	}
+	fprintf(archivo, "\n\t\t\t</thead>");
+
+	while (true) {
+		registro = tabla[x][y];
+		registro_siguiente = tabla[registro.siguiente_x][registro.siguiente_y];
+
+		if (
+			registro.siguiente_x == x 									&&
+			registro.siguiente_y == y - 1 								||
+			registro_siguiente.siguiente_x == registro.siguiente_x 		&&
+			registro_siguiente.siguiente_y == registro.siguiente_y + 1
+		) {
+			sur = true;
+		}
+		if (
+			registro.siguiente_x == x + 1 								&&
+			registro.siguiente_y == y									||
+			registro_siguiente.siguiente_x == registro.siguiente_x - 1 	&&
+			registro_siguiente.siguiente_y == registro.siguiente_y
+		) {
+			oeste = true;
+		}
+		if (
+			registro.siguiente_x == x 									&&
+			registro.siguiente_y == y + 1								||
+			registro_siguiente.siguiente_x == registro.siguiente_x 		&&
+			registro_siguiente.siguiente_y == registro.siguiente_y - 1
+		) {
+			norte = true;
+		}
+		if (
+			registro.siguiente_x == x - 1 								&&
+			registro.siguiente_y == y									||
+			registro_siguiente.siguiente_x == registro.siguiente_x + 1 	&&
+			registro_siguiente.siguiente_y == registro.siguiente_y
+		) {
+			este = true;
+		}
+
+		if 	(norte && sur) 		char_registro[registro.siguiente_x][registro.siguiente_y] = "│";
+		if 	(sur && este) 		char_registro[registro.siguiente_x][registro.siguiente_y] = " ┌─";
+		if 	(norte && este) 	char_registro[registro.siguiente_x][registro.siguiente_y] = " └─";
+		if 	(sur && oeste) 		char_registro[registro.siguiente_x][registro.siguiente_y] = "─┐ ";
+		if 	(norte && oeste) 	char_registro[registro.siguiente_x][registro.siguiente_y] = "─┘ ";
+		if 	(oeste && este) 	char_registro[registro.siguiente_x][registro.siguiente_y] = "───";
+
+		if 		(registro.despegue) 		char_registro[x][y] = "●";
+		else if (registro.aterrizaje) 		char_registro[x][y] = "⯀";
+		else if (registro.ataque_kamikaze) 	char_registro[x][y] = "⯁";
+		else if (registro.soltar_granada1) 	char_registro[x][y] = "⯌";
+		else if (registro.soltar_granada2) 	char_registro[x][y] = "⯍";
+
+		if (registro.aterrizaje || registro.ataque_kamikaze) break; // Final del recorrido.
+
+		norte 	= false;
+		sur 	= false;
+		este 	= false;
+		oeste 	= false;
+		x = registro.siguiente_x;
+		y = registro.siguiente_y;
+	}
+
+	for (int k = 0; k < TABLA_TAMANO_Y; k++) {
+		fprintf(archivo, "\n\t\t\t<tr>\n\t\t\t<td><div class=\"content\">%d</div></td>", k + 1); // Fila.
+		for (int j = 0; j < TABLA_TAMANO_X; j++) {
+			fprintf(archivo, "\n\t\t\t<td title=\"Celda %dx%d", j + 1, k + 1); // Numero de celda.
+			if (tabla[j][k].despegue) 			fprintf(archivo, "&#10;Celda de despegue");
+			if (tabla[j][k].aterrizaje) 		fprintf(archivo, "&#10;Celda de aterrizaje");
+			if (tabla[j][k].ataque_kamikaze) 	fprintf(archivo, "&#10;Ataque kamikaze");
+			if (tabla[j][k].soltar_granada1) 	fprintf(archivo, "&#10;Ataque granada nº1");
+			if (tabla[j][k].soltar_granada2) 	fprintf(archivo, "&#10;Ataque granada nº2");
+			fprintf(archivo, "&#10;Tiempo de espera: %d s\"><div class=\"content\">%s</div></td>",
+				tabla[j][k].espera,
+				char_registro[j][k]
+			);
+		}
+		fprintf(archivo, "\n\t\t\t</tr>");
+	}
+	fprintf(archivo, R"(
+			</table>
+		</div>
+		</div>
+			<div class="referencia">
+			<h3 style="margin: 10px;">Referencia.</h3>
+			<table>
+			<tr><td><div class="content">●</div></td><td><p>Despegue</p></td></tr>
+			<tr><td><div class="content">⯀</div></td><td><p>Aterrizaje</p></td></tr>
+			<tr><td><div class="content">⯁</div></td><td><p>Ataque kamikaze</p></td></tr>
+			<tr><td><div class="content">⯌</div></td><td><p>Granada 1</p></td></tr>
+			<tr><td><div class="content">⯍</div></td><td><p>Granada 2</p></td></tr>
+			</table>
+			</div>
+		</section>
+	</div>
+	<footer style="padding: 5px; margin-top: auto; width: 100%;">
+	<hr width="100%"/>
+	<table width="100%">
+	<tr>
+	<td><p><small>Trabajo práctico AyED, K1153. <a href="https://github.com/jkainer/TP_Dron_K1153">Repositorio de GitHub.</a></small></p></td>
+	<td><p align="right"><small>Joaquín Kainer, Legajo 233.968-7</small></p></td>
+	</tr>
+	</table>
+	</footer>
+	</body>
+</html>
+<style>
+	body {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	height: 100%;
+	}
+	.main {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 5px;
+	align-items: center;
+	align-self: center;
+	height: 100%;
+	}
+	.border {
+	border: 2px solid black;
+	border-radius: 8px;
+	height: min-content;
+	overflow: hidden;
+	}
+	.scrollable {
+	max-height: 610px;
+	max-width: 629px;
+	overflow: auto;
+	}
+	.table {
+	border-collapse: collapse;
+	background-color: white;
+	height: min-content;
+	}
+	.table td {
+	border-top: 1px dashed gray;
+	border-left: 1px dashed gray;
+	border-bottom: 0px dashed gray;
+	border-right: 0px dashed gray;
+	padding: 0;
+	}
+	.content {
+	width: 28px;
+	user-select: none;
+	font-family: monospace;
+	font-size: 28px;
+	white-space: pre;
+	aspect-ratio: 1 / 1 ;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	}
+	.referencia {
+	border: 2px solid black;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	height: fit-content;
+	}
+	.referencia table{
+	border-top: 2px solid black;
+	border-bottom: 1px solid white;
+	border-collapse: collapse;
+	background-color: white;
+	}
+	.referencia td {padding: 5px;border-bottom: 1px dashed gray;}
+	.referencia td:nth-child(1) {border-right: 1px dashed gray;}
+	.table th .content, .table td:nth-child(1) .content{font-size: 12px;}
+	.table td:nth-child(1), .table th {
+	background-color: #d9d9d9;
+	position: sticky;
+	border: 0px dashed gray;
+	font-weight: 400;
+	}
+	.table td:nth-child(1) {left: 0;z-index: 2;}
+	.table th {top: 0;z-index: 3;}
+	.table th:nth-child(1) {top: 0;left: 0;z-index: 4;}
+</style>)");
+
+	fclose(archivo);
+	cout << "index.htm guardado correctamente." << endl;
 	return;
 }
 
@@ -1085,7 +1303,7 @@ void bucleMenu(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], bool &flag_tabla_car
 				break;
 			case 7: // Crear página HTML.
 				if (!comprobarTablaCargada(flag_tabla_cargada)) break;
-				crearHTML(tabla);
+				crearHTML(tabla, 3, 1);
 				break;
 		}
 	} while (eleccion != 0);
