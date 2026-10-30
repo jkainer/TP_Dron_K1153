@@ -1,6 +1,7 @@
 # Carpetas y archivos a ignorados por git.
 
 .vscode/
+build/
 src/test/
 Consigna.pdf
 termshot.sh

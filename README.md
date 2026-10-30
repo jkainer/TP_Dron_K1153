@@ -11,7 +11,9 @@
   * [Mostrar una tablas de órdenes](#mostrar-una-tablas-de-órdenes)
   * [Modificar un registro de una tabla en memoria](#modificar-un-registro-de-una-tabla-en-memoria)
   * [Guardar tabla en memoria en un archivo](#guardar-tabla-en-memoria-en-un-archivo)
-* [Condiciones de validez de una tabla de órdenes](#condiciones-de-validez-de-una-tabla-de-órdenes)
+  * [Modificar un registro de una tabla en archivo](#modificar-un-registro-de-una-tabla-en-archivo)
+  * [Visualizar una tablas de órdenes mediante HTML](#visualizar-una-tablas-de-órdenes-mediante-html)
+* [Condiciones de validación de una tabla de órdenes](#condiciones-de-validación-de-una-tabla-de-órdenes)
 * [Uso de Inteligencia Artificial](#uso-de-inteligencia-artificial)
 * [Agradecimientos](#agradecimientos)
 * [Referencias](#referencias)
@@ -25,7 +27,7 @@
 ## Guía de uso
 
 > [!NOTE]
-> Durante las pruebas y desarrollo del programa, y la realización de las capturas de ejemplo, se utilizó una versión modificada del programa para trabajar con tablas de resolución 5×5.
+> Durante las pruebas y desarrollo del programa, y la realización de las capturas de ejemplo, se utilizó una versión modificada del programa para trabajar con tablas de resolución de 5×5.
 
 ![Menú principal](img/img_menu.png)
 
@@ -39,53 +41,55 @@ Por favor, selecciones una de las siguientes opciones: (ej: 1, 2, 3)
   [3]. Crear un archivo de ataque nuevo.
   [4]. Corregir un registro del archivo.
   [5]. Corregir un registro en memoria.
-  [6]. Guardar en memoria un archivo nuevo.
+  [6]. Guardar tabla en memoria en un archivo nuevo.
   [7]. Visualizar un archivo de ataque en HTML.
   [0]. Terminar este programa.
 ```
 
-Para acceder a cualquiera de las opciones del menú se introduce el número correspondiente, o `[0]` para terminar la ejecución.
+Para acceder a cualquiera de las opciones del menú se debe introdir el número correspondiente, o `[0]` para terminar la ejecución.
 
 ![Terminando ejecución](img/img_terminar_ejecucion.png)
 
 > [!IMPORTANT]
-> Apenas iniciado el programa, ciertas opciones del menú se encontraran resaltadas en itálica, esto porque se encuentran deshabilitdas ya que son funciones que se ejecutan según una tabla de órdenes cargada en memoria.
+> Apenas iniciado el programa, ciertas opciones del menú están resaltadas en itálica, esto porque se encuentran deshabilitdas ya que son funciones que requieren para su ejecución una tabla de órdenes cargada en memoria.
 >
 > ![Menú italics](img/img_italics.png)
 >
-> Si se intenta acceder a una de estas opciones sin una tabla cargada, ocurre el siguiente error, y nos devuelve al menú principal de regreso.
+> Si se intenta acceder a una de estas opciones sin una tabla cargada, ocurre la siguiente alerta, devolviendo al menú principal de regreso.
 >
-> ![Error no tabla en memoria](img/img_err_no_tabla.png)
+> ![Alerta no tabla en memoria](img/img_wrn_no_tabla.png)
 
 ### Crear de una tabla de órdenes
 
-Para la creación de una tabla, se accede a la opción `[3]` desde el menú principal.
+Para crear de una tabla, se accede a la opción `[3]` desde el menú principal.
 
 Uno por uno, el programa solicitará los registros necesarios para poblar las celdas de la tabla.
 
 > [!IMPORTANT]
 > El programa recorre la tabla de izquierda a derecha, de arriba a abajo, desde la celda 1×1 hasta la 200×200.
 
-Una vez asignados los valores correspondientes de cada celda de la tabla, el programa llevará a cabo una [validación de los datos](#condiciones-de-validez-de-una-tabla-de-órdenes) ingresados. En caso de que la tabla sea inválida, los cambios realizados se desecharan, y el programa volverá a solicitar los valores de la tabla registro por registro.
+Una vez asignados los valores correspondientes de cada celda de la tabla, el programa procederá a realizar una [validación de los datos](#condiciones-de-validación-de-una-tabla-de-órdenes) ingresados. En caso de que la tabla sea inválida, los cambios realizados se desecharan, y el programa volverá a solicitar los valores de la tabla registro por registro.
 
 ![Error no tabla en memoria](img/img_err_tabla_invalida.png)
 
-Finalmente, el programa solicitará la dirección donde guardar el archivo creado.
+El programa solicitará la dirección donde guardar el archivo a crear. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
 
-![Error no tabla en memoria](img/img_guardar_archivo.png)
+![Alerta sobreescribir archivo](img/img_wrn_sobreescribir.png)
+
+![Archivo guardado correctamente](img/img_guardar_archivo.png)
 
 > [!TIP]
-> Se recomienda diseñar con antelación la tabla a ingresar en un metodo gráfico como papel, ya que el programa presenta una interfaz de texto, y puede resultar dificil de asignar una ruta sin una guía visual de auxilio.
+> Se recomienda diseñar con antelación la tabla a ingresar en un medio gráfico como papel, ya que el programa presenta una interfaz de texto, y puede resultar difícil de asignar una ruta sin una guía visual de auxilio.
 
 ### Cargar una tabla de órdenes
 
-Para la carga una tabla de órdenes a la memoria, se accede a la opción `[1]` desde el menú principal.
+Para cargar una tabla de órdenes a la memoria, se accede a la opción `[1]` desde el menú principal.
 
 El programa solicitará la dirección del archivo donde se almancena la tabla de órdenes.
 
 ![Archivo cargado correctamente](img/img_cargar_archivo.png)
 
-El programa ahora procederá a realizar una [validación de los datos de la tabla](#condiciones-de-validez-de-una-tabla-de-órdenes). En caso de que la tabla sea inválida, el programa volverá a solicitar la dirección de un archivo que contenga una tabla válida.
+El programa entonces procederá a realizar una [validación de los datos de la tabla](#condiciones-de-validación-de-una-tabla-de-órdenes). En caso de que la tabla sea inválida, el programa volverá a solicitar la dirección de un archivo que contenga una tabla válida.
 
 ![Error tabla de archivo inválida](img/img_err_tabla_archivo_invalida.png)
 
@@ -100,11 +104,11 @@ Una vez cargado correctamente el archivo, la tabla que contenía ahora se encuen
 >
 > ![Alerta no tabla en memoria](img/img_wrn_no_tabla.png)
 
-Para la visualizar los registros que componen a una tabla de órdenes cargada previamente en memoria, se accede a la opción `[2]` desde el menú principal.
-
-![Mostrando registro de tabla](img/img_mostar_tabla.png)
+Para visualizar los registros que componen a una tabla de órdenes cargada previamente en memoria, se accede a la opción `[2]` desde el menú principal.
 
 El programa mostrará los contenidos de cada registro de la tabla cargada de izquierda a derecha, de arriba a abajo, desde la celda 1×1 hasta la 200×200.
+
+![Mostrando registro de tabla](img/img_mostar_tabla.png)
 
 Una vez finalizado el recorrido, el programa volverá al menú principal.
 
@@ -119,7 +123,22 @@ Para modificar un registro de una tabla de órdenes cargada previamente en memor
 
 ![Modificar registro en memoria](img/img_modificar_memoria.png)
 
-…
+El programa solicitará las coordenadas de la celda a modificar. Una vez elegida la celda, se mostrará por pantalla el registro original.
+
+Aplicados los cambios respectivos, el programa mostrará el registro con los cambios hechos, y solicitará como continuar.
+
+El usuario puede elegir si modificar otro registro. Entonces, el programa solicitará las coordenadas de la celda nueva, y se repetirá el proceso.
+
+Una vez finalizados los cambios, el programa solicitará si guardar los cambios ejercidos en el archivo. Entonces, el programa entonces procederá a realizar una [validación de los datos de la tabla](#condiciones-de-validación-de-una-tabla-de-órdenes) con los nuevos cambios aplicados. En caso de que los cambios sean inválidos, el programa desechará los cambios hechos, volviendo al menú principal.
+
+![Error cambios inválidos](img/img_err_cambios_invalidos.png)
+
+Con los cambios validados, la tabla modificada se guardará en la memoria del programa.
+
+> [!IMPORTANT]
+> El programa indicará que se han realizado cambios a la tabla de órdenes sin guardar en el menú principal con el nombre del archivo cargado en itálica y con un asterisco hasta que se guarden los datos.
+>
+> ![Menú principal cambios sin guardar](img/img_menu_cambios_sin_guardar.png)
 
 ### Guardar tabla en memoria en un archivo
 
@@ -128,7 +147,13 @@ Para modificar un registro de una tabla de órdenes cargada previamente en memor
 >
 > ![Alerta no tabla en memoria](img/img_wrn_no_tabla.png)
 
-…
+Para guardar una tabla de órdenes en memoria en un archivo, se accede a la opción `[6]` desde el menú principal.
+
+El programa solicitará la dirección donde guardar el archivo a crear. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
+
+![Alerta sobreescribir archivo](img/img_wrn_sobreescribir.png)
+
+![Archivo guardado correctamente](img/img_guardar_archivo.png)
 
 ### Modificar un registro de una tabla en archivo
 
@@ -136,13 +161,40 @@ Para modificar un registro de una tabla de órdenes de un archivo, se accede a l
 
 ![Modificar registro en archivo](img/img_modificar_archivo.png)
 
-…
+El programa solicitará las coordenadas de la celda a modificar. Una vez elegida la celda, se mostrará por pantalla el registro original.
+
+Aplicados los cambios respectivos, el programa mostrará el registro con los cambios hechos, y solicitará como continuar.
+
+El usuario puede elegir si modificar otro registro. Entonces, el programa solicitará las coordenadas de la celda nueva, y se repetirá el proceso.
+
+Una vez finalizados los cambios, el programa solicitará si guardar los cambios ejercidos en el archivo. Entonces, el programa entonces procederá a realizar una [validación de los datos de la tabla](#condiciones-de-validación-de-una-tabla-de-órdenes) con los nuevos cambios aplicados. En caso de que los cambios sean inválidos, el programa desechará los cambios hechos, volviendo al menú principal.
+
+![Error cambios inválidos](img/img_err_cambios_invalidos.png)
+
+Con los cambios validados, la tabla modificada se guardará en el archivo original, sobreescribiendo los registros originales.
+
+### Visualizar una tablas de órdenes mediante HTML
+
+> [!WARNING]
+> Esta función solo está habilitada con una tabla de órdenes ya cargada en memoria. De lo contrario, acceder a ella devolverá una alerta.
+>
+> ![Alerta no tabla en memoria](img/img_wrn_no_tabla.png)
+
+Para visualizar una tabla de órdenes en memoria mediante una página HTML, se accede a la opción `[7]` desde el menú principal.
+
+El programa generará entonces una página web HTML en el directorio del archivo cargado.
+
+![HTML creado](img/img_html_creado.png)
+
+Se puede acceder a este archivo HTML con cualquier navegador moderno.
+
+![Página HTML](img/img_html.png)
 
 ## Desarrollo y funciones
 
 …
 
-## Condiciones de validez de una tabla de órdenes
+## Condiciones de validación de una tabla de órdenes
 
 La lista de condiciones que una tabla debe cumplir para ser reconocida como válida son las siguientes:
 
