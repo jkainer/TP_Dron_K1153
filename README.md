@@ -68,9 +68,19 @@ Uno por uno, el programa solicitará los registros necesarios para poblar las ce
 > [!IMPORTANT]
 > El programa recorre la tabla de izquierda a derecha, de arriba a abajo, desde la celda 1×1 hasta la 200×200.
 
+![Creando tabla](img/img_creando_tabla.png)
+
+> [!TIP]
+> Cuando el programa solicite un valor de "Sí" o "No", `[s/n]`, al responder en blanco presionando la tecla Enter el programa asumirá el valor predeterminado, determinado por la mayúscula en la solicitud de respuesta.
+>
+> |         | Responde `s`    | Responde `n`    | Responde ` `    |
+> | ------- | --------------- | --------------- | --------------- |
+> | `[s/N]` | Respuesta = `s` | Respuesta = `n` | Respuesta = `n` |
+> | `[S/n]` | Respuesta = `s` | Respuesta = `n` | Respuesta = `s` |
+
 Una vez asignados los valores correspondientes de cada celda de la tabla, el programa procederá a realizar una [validación de los datos](#condiciones-de-validación-de-una-tabla-de-órdenes) ingresados. En caso de que la tabla sea inválida, los cambios realizados se desecharan, y el programa volverá a solicitar los valores de la tabla registro por registro.
 
-![Error no tabla en memoria](img/img_err_tabla_invalida.png)
+![Error tabla creada inválida](img/img_err_tabla_invalida.png)
 
 El programa solicitará la dirección donde guardar el archivo a crear. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
 
@@ -190,10 +200,6 @@ Se puede acceder a este archivo HTML con cualquier navegador moderno.
 
 ![Página HTML](img/img_html.png)
 
-## Desarrollo y funciones
-
-…
-
 ## Condiciones de validación de una tabla de órdenes
 
 La lista de condiciones que una tabla debe cumplir para ser reconocida como válida son las siguientes:
@@ -209,6 +215,10 @@ La lista de condiciones que una tabla debe cumplir para ser reconocida como vál
 * Tener no más de 1 celda de granada nº1 y 1 de granada nº2.
 
 En caso de no cumplir tan solo una de estas condiciones, el programa tachará de inválida la tabla, resultando en un error.
+
+## Desarrollo del programa
+
+…
 
 ## Uso de Inteligencia Artificial
 

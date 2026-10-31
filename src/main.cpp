@@ -13,7 +13,6 @@
 #define WARN "\033[1mAlerta\033[0m: " // Esto solo se usa una sola vez.
 using std::cin, std::cout, std::endl;
 
-
 // Comprueba que se se haya ingresado un valor válido. En caso de que
 // "cin" devuelva error, limpia el estado de error y devuelve "true".
 bool cinInvalido() {
@@ -873,12 +872,10 @@ bool modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	do {
 		while (true) { // Qué registro.
 			cout << "¿Qué registro desea modificar? (X;Y)" << endl;
-			cout << "X:" << endl;
-			cout << CURSOR;
+			cout << CURSOR << "X: ";
 			cin >> respuesta_x;
 			if (cinInvalido()) continue;
-			cout << "Y:" << endl;
-			cout << CURSOR;
+			cout << CURSOR << "Y: ";
 			cin >> respuesta_y;
 			if (cinInvalido()) continue;
 			respuesta_x--; // (Se interpreta que la tabla comienza en 1x1 y no en 0x0,
@@ -1245,8 +1242,8 @@ void crearHTML(
 bool comprobarTablaCargada(bool flag) {
 	if (!flag) {
 		cout << WARN; // MSG_WARN
-		cout << "No hay una tabla de órdenes cargada. ";
-		cout << "Cargue o cree una tabla primero para poder visualizarla." << endl;
+		cout << "No hay una tabla de órdenes cargada." << endl;
+		cout << "Cargue primero una tabla de órdenes a la memoria del programa para acceder a esta función." << endl;
 		return false;
 	}
 
@@ -1267,7 +1264,7 @@ void bucleMenu(
 		// la opción ingresada es incorrecta, pero sí si se
 		// acaba de salir de una opción real luego de utilizarla.
 		if (eleccion < 8) {
-			cout << endl;
+			//cout << endl;
 			cout << "Menú de opciones de control de memoria del dron." << endl;
 			if (flag_tabla_cargada) {
 				cout << "Archivo cargado: ";
