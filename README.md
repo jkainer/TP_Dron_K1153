@@ -1,7 +1,5 @@
 # Trabajo Práctico - Algoritmos y Estructura de Datos
 
-![Menú principal](img/img_menu.png)
-
 ## Índice
 
 * [Integrantes del equipo](#integrantes-del-equipo)
