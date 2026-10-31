@@ -1,5 +1,8 @@
 # Trabajo Práctico - Algoritmos y Estructura de Datos
 
+![Menú principal](img/img_menu_no_cursor.png)
+![Página HTML](img/img_html.png)
+
 ## Índice
 
 * [Integrantes del equipo](#integrantes-del-equipo)
@@ -30,19 +33,6 @@
 ![Menú principal](img/img_menu.png)
 
 Al iniciar el programa, nos recibe el menú principal con 7 funciones distintas, identificadas por un número de acceso.
-
-``` console
-Menú de opciones de control de memoria del dron.
-Por favor, selecciones una de las siguientes opciones: (ej: 1, 2, 3)
-  [1]. Cargar archivo de ataque a memoria.
-  [2]. Mostrar archivo cargado.
-  [3]. Crear un archivo de ataque nuevo.
-  [4]. Corregir un registro del archivo.
-  [5]. Corregir un registro en memoria.
-  [6]. Guardar tabla en memoria en un archivo nuevo.
-  [7]. Visualizar un archivo de ataque en HTML.
-  [0]. Terminar este programa.
-```
 
 Para acceder a cualquiera de las opciones del menú se debe introdir el número correspondiente, o `[0]` para terminar la ejecución.
 
@@ -76,15 +66,11 @@ Uno por uno, el programa solicitará los registros necesarios para poblar las ce
 > | `[s/N]` | Respuesta = `s` | Respuesta = `n` | Respuesta = `n` |
 > | `[S/n]` | Respuesta = `s` | Respuesta = `n` | Respuesta = `s` |
 
-Una vez asignados los valores correspondientes de cada celda de la tabla, el programa procederá a realizar una [validación de los datos](#condiciones-de-validación-de-una-tabla-de-órdenes) ingresados. En caso de que la tabla sea inválida, los cambios realizados se desecharan, y el programa volverá a solicitar los valores de la tabla registro por registro.
-
-![Error tabla creada inválida](img/img_err_tabla_invalida.png)
+Una vez asignados los valores correspondientes de cada celda de la tabla, el programa procederá a realizar una [validación de los datos](#condiciones-de-validación-de-una-tabla-de-órdenes) ingresados.
 
 El programa solicitará la dirección donde guardar el archivo a crear. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
 
 ![Alerta sobreescribir archivo](img/img_wrn_sobreescribir.png)
-
-![Archivo guardado correctamente](img/img_guardar_archivo.png)
 
 > [!TIP]
 > Se recomienda diseñar con antelación la tabla a ingresar en un medio gráfico como papel, ya que el programa presenta una interfaz de texto, y puede resultar difícil de asignar una ruta sin una guía visual de auxilio.
@@ -160,8 +146,6 @@ Para guardar una tabla de órdenes en memoria en un archivo, se accede a la opci
 El programa solicitará la dirección donde guardar el archivo a crear. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
 
 ![Alerta sobreescribir archivo](img/img_wrn_sobreescribir.png)
-
-![Archivo guardado correctamente](img/img_guardar_archivo.png)
 
 ### Modificar un registro de una tabla en archivo
 
