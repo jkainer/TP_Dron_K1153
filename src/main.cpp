@@ -564,7 +564,7 @@ void poblarTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 		if (!validarTabla(tabla)) {
 			cout << ERROR; // MSG_ERROR
-			cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl; 
+			cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl;
 			// Este mensaje después de introducir 40 mil registros
 			// debe ser horrible, por decirlo de manera no bulgar.
 			continue;
@@ -952,6 +952,8 @@ bool modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 				}
 				cout << "Cambios validados. Todo en orden." << endl;
 				clonarTabla(tabla_nueva, tabla);
+				cout << "Presione Enter para continuar… "; // MSG_SUCCESS
+				cin.ignore();
 				return true;
 			case 'n':
 			case 'N':
@@ -1158,8 +1160,8 @@ void crearHTML(
 		height: 100%;
 		}
 		.borde {
-		border: 2px solid black;
-		border-radius: 5px;
+		border: 1px solid black;
+		border-radius: 1px;
 		height: min-content;
 		overflow: hidden;
 		}
@@ -1193,8 +1195,8 @@ void crearHTML(
 		align-items: center;
 		}
 		.referencia {
-		border: 2px solid black;
-		border-radius: 5px;
+		border: 1px solid black;
+		border-radius: 1px;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
@@ -1202,7 +1204,7 @@ void crearHTML(
 		height: fit-content;
 		}
 		.referencia table{
-		border-top: 2px solid black;
+		border-top: 1px solid black;
 		border-bottom: 1px solid white;
 		border-collapse: collapse;
 		background-color: white;
@@ -1333,8 +1335,7 @@ void bucleMenu(
 				break;
 			case 5: // Modificar tabla en memoria.
 				if (!comprobarTablaCargada(flag_tabla_cargada)) break;
-				modificarRegistro(tabla);
-				flag_tabla_modificada = true;
+				flag_tabla_modificada = modificarRegistro(tabla);
 				break;
 			case 6: // Guardar archivo de ataque.
 				if (!comprobarTablaCargada(flag_tabla_cargada)) break;
