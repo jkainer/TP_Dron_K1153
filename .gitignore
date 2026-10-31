@@ -3,5 +3,7 @@
 .vscode/
 build/
 src/test/
+src/demo/
+src/main_alt.cpp
 Consigna.pdf
 termshot.sh
