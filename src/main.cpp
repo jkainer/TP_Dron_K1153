@@ -4,8 +4,8 @@
 #include <limits> // Línea 30
 #define CURSOR "-> " // Cursor indicativo de interfaz. Puramente estético.
 #define RUTA_MAX 256 // Tamaño máximo en caracteres posible para ruta de un archivo.
-#define TABLA_TAMANO_X 5 // Tamaño horizontal de la tabla del órdenes.
-#define TABLA_TAMANO_Y 5 // Tamaño vertical de la tabla del órdenes.
+#define TABLA_TAMANO_X 200 // Tamaño horizontal de la tabla del órdenes.
+#define TABLA_TAMANO_Y 200 // Tamaño vertical de la tabla del órdenes.
 #define ANSI_ITALICS "\033[3m" // Código ANSI para Italics.
 #define ANSI_CLEAR "\033[0m"
 #define ANSI_LINEA_ANTERIOR "\033[F" // Mover el cursor de la terminal al inicio de la linea anterior.
