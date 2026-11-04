@@ -43,7 +43,7 @@
 
 ![Menú principal](img/img_menu.png)
 
-Al iniciar el programa, nos recibe el menú principal con 7 funciones distintas, identificadas por un número de acceso.
+Al iniciarlo, el programa presenta menú principal con 7 funciones distintas, identificadas por un número de acceso.
 
 Para acceder a cualquiera de las opciones del menú se debe introdir el número correspondiente, o `[0]` para terminar la ejecución.
 
@@ -63,9 +63,6 @@ Para acceder a cualquiera de las opciones del menú se debe introdir el número 
 Para crear de una tabla, se accede a la opción `[3]` desde el menú principal.
 
 Uno por uno, el programa solicitará los registros necesarios para poblar las celdas de la tabla.
-
-> [!IMPORTANT]
-> El programa recorre la tabla de izquierda a derecha, de arriba a abajo, desde la celda 1×1 hasta la 200×200.
 
 ![Creando tabla](img/img_creando_tabla.png)
 
@@ -708,7 +705,14 @@ Hola.
 
 ```console
 ┌──────────────────────────────────────┐
-⋮
+│ Posición actual (X;Y):         (4;2)
+│ Despegue:                  Verdadero
+│ Aterrizaje:                    Falso
+│ Soltar granada nº1:            Falso
+│ Soltar granada nº2:            Falso
+│ Ataque kamikaze:               Falso
+│ Espera [Segundos]:              25 s
+│ Posición siguiente (X;Y):      (4;1)
 └─ Presione Enter para continuar… ─────┘
 ```
 
