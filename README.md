@@ -1,4 +1,4 @@
-# Trabajo Práctico - Algoritmos y Estructura de Datos
+# Trabajo Práctico - Algoritmos y Estructura de Datos K1153
 
 ![Menú principal](img/img_menu_no_cursor.png)
 ![Página HTML](img/img_html.png)
@@ -204,7 +204,7 @@ En caso de no cumplir tan solo una de estas condiciones, el programa tachará de
 
 ## Uso de Inteligencia Artificial
 
-Si bien cada día la inteligencia artificial demuestra ser una herramienta cada vez más poderosa y (…), el equipo tomó la decisión de __no__ utilizarla en lo absoluto durante el desarrollo de este proyecto.
+Si bien cada día la inteligencia artificial demuestra ser una herramienta cada vez más poderosa, el equipo tomó la decisión de __no__ utilizarla en lo absoluto durante el desarrollo de este proyecto.
 
 Consideramos que en una etapa de formación y desarrollo como es un trabajo práctico para un organismo académico como es la universidad, se castiga no solo con la reducción de oportunidades para aplicar y entrenar la habilidad de resolución de problemas, habilidad fundamental en y para una ingeniería, sino tambien la de la incerteza e falibilidad fundamentalmente ligadas a todo modelo generativo de lenguaje (LLM) por su mismo diseño.
 
@@ -215,7 +215,7 @@ Parte de diseñar es tomar decisiones deliberadas, valorando multiples opciones 
 
 Las inteligencias artificiales parecen ocupar cada vez más espacio en la vida cotidiana y profesional, con o sin la aprobación de a quienes se les implementa, pero este resultó no ser un momento adecuado para dicha implementación.
 
-Debido a este y múltiples motivos personales que no tienen lugar aquí, se llegó a la decisión de __nulo empleo__.
+Debido a este y múltiples motivos personales que no tienen lugar aquí, se llegó a la decisión de __no emplearla__.
 
 ## Agradecimientos
 
@@ -224,3 +224,9 @@ Se agradece cordialmente a Roxana Dabusti y Deix Surita por la ayuda proporciona
 ## Referencias
 
 [Manufacturer’s Guide to Developing Consumer Product Instructions - Timothy P. Smith](https://www.cpsc.gov/s3fs-public/pdfs/guide.pdf)
+
+[ANSI Escape Sequences - Christian Petersen](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)
+
+[The C Programming Language - Brian W. Kernighan & Dennis M. Ritchie](https://seriouscomputerist.atariverse.com/media/pdf/book/C%20Programming%20Language%20-%202nd%20Edition%20(OCR).pdf)
+
+[_https://cplusplus.com/_](https://cplusplus.com/forum/), [_https://stackoverflow.com/_](https://stackoverflow.com), [_https://www.geeksforgeeks.org/_](https://www.geeksforgeeks.org/), [_https://en.cppreference.com/_](https://en.cppreference.com/cpp/), & [_https://www.learncpp.com/_](https://www.learncpp.com/)
