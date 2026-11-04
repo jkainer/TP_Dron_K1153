@@ -10,7 +10,7 @@
 #define ANSI_CLEAR "\033[0m"
 #define ANSI_LINEA_ANTERIOR "\033[F" // Mover el cursor de la terminal al inicio de la linea anterior.
 #define ERROR "\033[1mError\033[0m: " // "Error:" con el código ANSI de negrita.
-#define WARN "\033[1mAlerta\033[0m: " // Esto solo se usa una sola vez.
+#define WARN "\033[1mAlerta\033[0m: "
 using std::cin, std::cout, std::endl;
 
 // Comprueba que se se haya ingresado un valor válido. En caso de que
@@ -57,7 +57,7 @@ struct OrdenArchivo {
 	bool despegue 			= false;
 	int siguiente_x 		= 0;
 	int siguiente_y 		= 0;
-};	
+};
 
 struct Orden {
 	bool despegue 			= false;
@@ -269,7 +269,7 @@ bool indexarTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], Flags &flags) {
 					cout << "La tabla contiene más de 1 celda de granada nº2." << endl;
 					return false;
 				}
-				flags.granada1 = true;
+				flags.granada2 = true;
 			}
 		}
 	}
@@ -376,7 +376,7 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 				registro.aterrizaje = true;
 				registro.ataque_kamikaze = false;
 				flags.aterrizaje = true;
-				break;
+				return;
 			case 'n':
 			case 'N':
 			case '\n':
@@ -409,7 +409,7 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 				registro.aterrizaje = false;
 				registro.ataque_kamikaze = true;
 				flags.kamikaze = true;
-				break;
+				return;
 			case 'n':
 			case 'N':
 			case '\n':
@@ -554,17 +554,46 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 // Solicita valores al usuario para poblar una tabla, registro a registro.
 void poblarTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 	Flags flags;
+	int x = -1, y = -1, siguiente_x = -1, siguiente_y = -1;
 
 	while (true) {
-		for (int y = 0; y < TABLA_TAMANO_Y; y++) {
-			for (int x = 0; x < TABLA_TAMANO_X; x++) {
-				poblarRegistro(tabla[x][y], x, y, flags);
+		while (true) { // Qué registro.
+			cout << "Introduzca celda de despegue." << endl;
+			cout << CURSOR << "X: ";
+			cin >> x;
+			if (cinInvalido()) continue;
+			cout << CURSOR << "Y: ";
+			cin >> y;
+			if (cinInvalido()) continue;
+			x--; // (Se interpreta que la tabla comienza en 1x1 y no en 0x0,
+			y--; // así que se decrementan ambos).
+	
+			if (
+				x >= TABLA_TAMANO_X ||
+				y >= TABLA_TAMANO_Y
+			) {
+				cout << ERROR; // MSG_ERROR
+				cout << "Celda fuera de límites. Elija otra posición." << endl;
+				continue;
 			}
+			cin.ignore(); // Leading whitespace.
+			break;
+		}
+		tabla[x][y].despegue = true;
+		flags.despegue = true;
+		flags.posiciones_transitadas[x][y] = true;
+		while (true) {
+			poblarRegistro(tabla[x][y], x, y, flags);
+			if (flags.aterrizaje || flags.kamikaze) break;
+			siguiente_x = tabla[x][y].siguiente_x;
+			siguiente_y = tabla[x][y].siguiente_y;
+			x = siguiente_x;
+			y = siguiente_y;
 		}
 
 		if (!validarTabla(tabla)) {
 			cout << ERROR; // MSG_ERROR
-			cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl;
+			cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl; 
 			// Este mensaje después de introducir 40 mil registros
 			// debe ser horrible, por decirlo de manera no bulgar.
 			continue;
@@ -633,7 +662,7 @@ void mostrarRegistro(Orden registro, int x, int y) {
 	cout << "└──────────────────────────────────────┘ " << endl;
 
 	return;
-};
+}
 
 
 // Muestra el contenido de una tabla de órdenes por pantalla.
@@ -1261,7 +1290,7 @@ void bucleMenu(
 ) {
 	int eleccion = -1;
 
-	do {
+	while (eleccion != 0) {
 		// Con esta comparación se evita reimprimir el menú si
 		// la opción ingresada es incorrecta, pero sí si se
 		// acaba de salir de una opción real luego de utilizarla.
@@ -1272,6 +1301,8 @@ void bucleMenu(
 				cout << "Archivo cargado: ";
 				if (flag_tabla_modificada) cout << ANSI_ITALICS;
 				cout << "\"" << direccion_archivo << "\"";
+				// Se agrega un asterisco para denotar de manera visual que
+				// se realizaron cambios a la tabla en memoria.
 				if (flag_tabla_modificada) cout << ANSI_CLEAR << "*";
 				cout << endl;
 			}
@@ -1347,7 +1378,7 @@ void bucleMenu(
 				crearHTML(tabla, direccion_archivo);
 				break;
 		}
-	} while (eleccion != 0);
+	}
 
 	return;
 }
