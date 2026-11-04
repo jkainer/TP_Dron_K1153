@@ -1084,13 +1084,235 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 
 ### _Modificar registro_
 
-…
+```cpp
+// Solicita uno o más registros de una tabla dada para modificar.
+bool modificarRegistro(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
+  char respuesta = '\0';
+  unsigned int respuesta_x = 0, respuesta_y = 0;
+  Orden tabla_nueva[TABLA_TAMANO_X][TABLA_TAMANO_Y];
+  Flags *flags;
+
+  // Para poder anular los cambios en caso de que sean inválidos.
+  clonarTabla(tabla, tabla_nueva);
+
+  do {
+    while (true) { // Qué registro.
+      cout << "¿Qué registro desea modificar? (X;Y)" << endl;
+      cout << CURSOR << "X: ";
+      cin >> respuesta_x;
+      if (cinInvalido()) continue;
+      cout << CURSOR << "Y: ";
+      cin >> respuesta_y;
+      if (cinInvalido()) continue;
+      respuesta_x--; // (Se interpreta que la tabla comienza en 1x1 y no en 0x0,
+      respuesta_y--; // así que se decrementan ambos).
+  
+      if (
+        respuesta_x >= TABLA_TAMANO_X ||
+        respuesta_y >= TABLA_TAMANO_Y
+      ) {
+        cout << ERROR; // MSG_ERROR
+        cout << "Celda fuera de límites. Elija otra posición." << endl;
+        continue;
+      }
+      cin.ignore(); // Leading whitespace.
+
+      break;
+    }
+
+    cout << "Registro original:" << endl;
+    mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
+
+    flags = new Flags();
+    // ~He construído un castillo desde afuera hacia adentro, y ahora que yazco en la última de las cámaras,
+    // sin puertas ni ventanas, solo me resta una única salida: cavar un agujero~
+    poblarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y, *flags);
+    delete flags;
+
+    cout << endl << "Resultado:" << endl;
+    mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
+
+    while (true) {
+      cout << "¿Cambiar otro registro? [s/N]" << endl;
+      cout << CURSOR;
+      cin.get(respuesta);
+      switch (respuesta) {
+        default:
+          cout << ERROR; // MSG_ERROR
+          cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+          cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Leading whitespace.
+          continue;
+        case 's':
+        case 'S':
+        case 'n':
+        case 'N':
+        case '\n':
+          break;
+      }
+      if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+      break;
+    }
+  } while (respuesta == 's' || respuesta == 'S');
+
+  while (true) { // Guardar cambios.
+    cout << "¿Guardar cambios? [S/n]" << endl;
+    cout << CURSOR;
+    cin.get(respuesta);
+
+    switch (respuesta) {
+      default:
+        cout << ERROR; // MSG_ERROR
+        cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+        cin.ignore(); // Leading whitespace.
+        continue;
+      case 's':
+      case 'S':
+      case '\n':
+        cout << "Validando cambios…" << endl;
+        if (!validarTabla(tabla_nueva)) {
+          cout << ERROR; // MSG_ERROR
+          cout << "Las modificaciones hechas a la tabla son inválidas.";
+          cout << " Deshaciendo los cambios." << endl;
+          clonarTabla(tabla, tabla_nueva);
+          return false;
+        }
+        cout << "Cambios validados. Todo en orden." << endl;
+        clonarTabla(tabla_nueva, tabla);
+        cout << "Presione Enter para continuar… "; // MSG_SUCCESS
+        cin.ignore();
+        return true;
+      case 'n':
+      case 'N':
+        clonarTabla(tabla, tabla_nueva);
+        cout << "Se han deshecho los cambios." << endl;
+        return false;
+    }
+  }
+}
+```
+
+Para modificar un registro individual de una tabla cargada en memoria, primero se copia el contenido de la tabla a modificar en una tabla secundaria donde se efectuarán los cambios antes de validarlos.
+
+```cpp
+  // Para poder anular los cambios en caso de que sean inválidos.
+  clonarTabla(tabla, tabla_nueva);
+```
+
+Entonces, el programa procederá a solicitarle al usuario a cual celda acceder para modificar sus contenidos.
+
+```cpp
+    while (true) { // Qué registro.
+      cout << "¿Qué registro desea modificar? (X;Y)" << endl;
+      cout << CURSOR << "X: ";
+      cin >> respuesta_x;
+      if (cinInvalido()) continue;
+      cout << CURSOR << "Y: ";
+      cin >> respuesta_y;
+      if (cinInvalido()) continue;
+      respuesta_x--; // (Se interpreta que la tabla comienza en 1x1 y no en 0x0,
+      respuesta_y--; // así que se decrementan ambos).
+  
+      if (
+        respuesta_x >= TABLA_TAMANO_X ||
+        respuesta_y >= TABLA_TAMANO_Y
+      ) {
+        cout << ERROR; // MSG_ERROR
+        cout << "Celda fuera de límites. Elija otra posición." << endl;
+        continue;
+      }
+      cin.ignore(); // Leading whitespace.
+
+      break;
+    }
+```
+
+El programa mostrará por pantalla el contenido original de la celda, y solicitará uno por uno los valores del registro nuevo.
+
+```cpp
+    cout << "Registro original:" << endl;
+    mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
+
+    flags = new Flags();
+    // ~He construído un castillo desde afuera hacia adentro, y ahora que yazco en la última de las cámaras,
+    // sin puertas ni ventanas, solo me resta una única salida: cavar un agujero~
+    poblarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y, *flags);
+    delete flags;
+
+    cout << endl << "Resultado:" << endl;
+    mostrarRegistro(tabla_nueva[respuesta_x][respuesta_y], respuesta_x, respuesta_y);
+```
+
+Una vez ingresados los valores nuevos, el programa verificará la validez de la tabla con los cambios implementados, y en caso de no ser válidos, desechará los cambios efectuados.
+
+```cpp
+  while (true) { // Guardar cambios.
+    cout << "¿Guardar cambios? [S/n]" << endl;
+    cout << CURSOR;
+    cin.get(respuesta);
+
+    switch (respuesta) {
+      default:
+        cout << ERROR; // MSG_ERROR
+        cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+        cin.ignore(); // Leading whitespace.
+        continue;
+      case 's':
+      case 'S':
+      case '\n':
+        cout << "Validando cambios…" << endl;
+        if (!validarTabla(tabla_nueva)) {
+          cout << ERROR; // MSG_ERROR
+          cout << "Las modificaciones hechas a la tabla son inválidas.";
+          cout << " Deshaciendo los cambios." << endl;
+          clonarTabla(tabla, tabla_nueva);
+          return false;
+        }
+        cout << "Cambios validados. Todo en orden." << endl;
+        clonarTabla(tabla_nueva, tabla);
+        cout << "Presione Enter para continuar… "; // MSG_SUCCESS
+        cin.ignore();
+        return true;
+      case 'n':
+      case 'N':
+        clonarTabla(tabla, tabla_nueva);
+        cout << "Se han deshecho los cambios." << endl;
+        return false;
+    }
+  }
+```
+
+Si los cambios hechos son válidos, se transferirán los contenidos modificados de la tabla modificada a la tabla original en memoria, y el programa volverá al menú principal.
 
 ---
 
 ### _Modificar registro de archivo_
 
-…
+```cpp
+// Solicita uno o más registros de una tabla solicitada de un archivo para modificar.
+void modificarRegistroDeArchivo() {
+  char direccion_archivo[RUTA_MAX] = { '\0' };
+  OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y];
+  Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y];
+
+  cout << "Por favor, ingrese una ruta de un archivo a cargar." << endl;
+  while (true) {
+    if (!buscarArchivo(direccion_archivo, 'r')) continue;
+    if (!leerArchivo(direccion_archivo, lista_archivo)) continue;
+    listaATabla(lista_archivo, tabla);
+    if (!validarTabla(tabla)) continue;
+    if (!modificarRegistro(tabla)) return;
+    tablaALista(lista_archivo, tabla);
+    if (!escribirArchivo(direccion_archivo, lista_archivo)) continue;
+    break;
+  }
+  // Archivo -> Memoria (Lista) -> Memoria (Tabla) -> Se edita -> Memoria (Tabla) -> Memoria (Lista) -> Archivo.
+  // Efectivamente ineficiente.
+
+  return;
+}
+```
+
+
 
 ---
 
@@ -1354,73 +1576,6 @@ Y finalmente se guarda el archivo, y el programa se devuelve al menú principal.
 
 ---
 
-### otro
-
-```cpp
-// Comprueba la existencia de un archivo en una dirección dada.
-// Retorna "false" si no existe.
-bool buscarArchivo(char direccion_archivo[RUTA_MAX], char modo) {
-  FILE *archivo;
-  int tamaño_archivo = 0;
-  char respuesta = '\0';
-
-  cout << CURSOR;
-  cin.getline(direccion_archivo, RUTA_MAX);
-  //cin >> direccion_archivo;
-
-  switch (modo) {
-    case 'r':
-      ⋮
-      break;
-    case 'w':
-      archivo = fopen(direccion_archivo, "r");
-      if (archivo == NULL) {
-        archivo = fopen(direccion_archivo, "w");
-        if (archivo == NULL) { // No existe el directorio, no se puede crear
-          cout << ERROR; // MSG_ERROR
-          cout << "La dirección del archivo ingresada es inválida. ";
-          cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
-          return false;
-        }
-        break; // No existe el archivo, se puede crear.
-      }
-
-      fclose(archivo); // Si existe.
-      archivo = NULL;
-      cout << WARN; // MSG_WARN
-      cout << "El archivo ya existe. ¿Desea sobreescribirlo? [s/N]" << endl;
-      do {
-        cout << CURSOR;
-        cin.get(respuesta);
-        switch (respuesta) {
-          default:
-            cout << ERROR; // MSG_ERROR
-            cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
-            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Leading whitespace.
-            continue;
-          case 's':
-          case 'S':
-            if (!(archivo = fopen(direccion_archivo, "w"))) {
-              cout << ERROR; // MSG_ERROR
-              cout << "No se pudo sobreescribir el archivo." << endl;
-              archivo = NULL;
-              break; // "archivo_ataque" == NULL.
-            }
-            fclose(archivo);
-            break; // "archivo_ataque" != NULL.
-          case 'n':
-          case 'N':
-          case '\n':
-            cout << "Ingrese una ruta diferente." << endl;
-            return false;
-        }
-        if (respuesta != '\n') cin.ignore(); // Leading whitespace.
-      } while (archivo == NULL);
-  }
-
-  return true;
-}
-```
 
 ## Uso de Inteligencia Artificial
 
