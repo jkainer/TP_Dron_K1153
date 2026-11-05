@@ -593,9 +593,7 @@ void poblarTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 
 		if (!validarTabla(tabla)) {
 			cout << ERROR; // MSG_ERROR
-			cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl; 
-			// Este mensaje después de introducir 40 mil registros
-			// debe ser horrible, por decirlo de manera no bulgar.
+			cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl;
 			continue;
 		}
 		break;
