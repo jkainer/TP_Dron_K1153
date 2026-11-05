@@ -7,9 +7,9 @@
 
 * [Integrantes del equipo](#integrantes-del-equipo)
 * [Guía de uso](#guía-de-uso)
-  * [Crear de una tabla de órdenes](#crear-de-una-tabla-de-órdenes)
+  * [Crear una tabla de órdenes](#crear-una-tabla-de-órdenes)
   * [Cargar una tabla de órdenes](#cargar-una-tabla-de-órdenes)
-  * [Mostrar una tablas de órdenes](#mostrar-una-tablas-de-órdenes)
+  * [Mostrar una tablas de órdenes](#mostrar-una-tabla-de-órdenes)
   * [Modificar un registro de una tabla en memoria](#modificar-un-registro-de-una-tabla-en-memoria)
   * [Guardar tabla en memoria en un archivo](#guardar-tabla-en-memoria-en-un-archivo)
   * [Modificar un registro de una tabla en archivo](#modificar-un-registro-de-una-tabla-en-archivo)
@@ -39,18 +39,18 @@
 ## Guía de uso
 
 > [!NOTE]
-> Durante las pruebas y desarrollo del programa, y la realización de las capturas de ejemplo, se utilizó una versión modificada del programa para trabajar con tablas de resolución de 5×5.
+> Durante las pruebas y desarrollo del programa junto a la realización de las capturas de ejemplo de la siguiente guía, se utilizó una versión modificada del programa para trabajar con tablas de resolución 5×5.
 
 ![Menú principal](img/img_menu.png)
 
 Al iniciar, el programa presenta menú principal con 7 funciones distintas, identificadas por un número de acceso.
 
-Para acceder a cualquiera de las opciones del menú se debe introdir el número correspondiente, o `[0]` para terminar la ejecución.
+Para acceder a cualquiera de las opciones del menú se debe introducir el número correspondiente, o `[0]` para terminar la ejecución.
 
 ![Terminando ejecución](img/img_terminar_ejecucion.png)
 
 > [!IMPORTANT]
-> Apenas iniciado el programa, ciertas opciones del menú están resaltadas en itálica, esto porque se encuentran deshabilitdas ya que son funciones que requieren para su ejecución una tabla de órdenes cargada en memoria.
+> Apenas iniciado el programa, ciertas opciones del menú están resaltadas en itálica, esto porque se encuentran deshabilitdas ya que son funciones que requieren de una tabla de órdenes cargada en memoria para su ejecución.
 >
 > ![Menú italics](img/img_italics.png)
 >
@@ -135,7 +135,7 @@ Para modificar un registro de una tabla de órdenes cargada previamente en memor
 
 El programa solicitará las coordenadas de la celda a modificar. Una vez elegida la celda, se mostrará por pantalla el registro original.
 
-Aplicados los cambios respectivos, el programa mostrará el registro con los cambios hechos, y solicitará como continuar.
+Aplicados los cambios respectivos, el programa mostrará el registro modificado con los cambios hechos, y solicitará como continuar.
 
 El usuario puede elegir si modificar otro registro. Entonces, el programa solicitará las coordenadas de la celda nueva, y se repetirá el proceso.
 
@@ -161,9 +161,11 @@ Con los cambios validados, la tabla modificada se guardará en la memoria del pr
 
 Para guardar una tabla de órdenes en memoria en un archivo, se accede a la opción `[6]` desde el menú principal.
 
-El programa solicitará la dirección donde guardar el archivo a crear. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
+El programa solicitará la dirección donde guardar el archivo. Si el archivo ya existe, el programa indicará esto y solicitará como continuar. El usuario podrá elegir si sobreescribir el archivo o elegir otra dirección.
 
 ![Alerta sobreescribir archivo](img/img_wrn_sobreescribir.png)
+
+---
 
 ### Modificar un registro de una tabla en archivo
 
@@ -482,7 +484,7 @@ Que valida el _flag_ `flag_tabla_cargada`, y devuelve `false` en caso de que el 
 
 ### _Cargar archivo_
 
-Como explico en el comentario, durante la totalidad del proyecto, utilizo la sentencia `while ()` de manera inversa a la intencionada, sin un valor de salida de bucle, sinó que invierto la lógica, utilizando sentencias `if ()` para determinar puntos clave donde volver al inicio del bucle. Esto lo hago tanto por una mejora de legibilidad del código, como por una de granularidad de los mensajes de error.
+Como explico en el comentario, durante la totalidad del proyecto, se utiliza la sentencia `while ()` de manera inversa a la intencionada, sin un valor de salida de bucle, sinó que invierto la lógica, utilizando sentencias `if ()` para determinar puntos clave donde volver al inicio del bucle. Esto lo hago tanto por una mejora de legibilidad del código, como por una de granularidad de los mensajes de error.
 
 En vez de llevar pendiente una variable que haga la de flag de salida del bucle, repito de manera instantánea el bucle utilizando la palabra clave `continue` cuando una verificación no se cumple, permitiendome también identificar con exactitud en que momento del proceso se detuvo, pudiendo mostrar por pantalla un error concreto; y saliendo del bucle llegado al final con la palabra clave `break`.
 
@@ -625,9 +627,9 @@ bool leerArchivo(
 }
 ```
 
-Esta función toma por parametros una dirección de archivo `char direccion_archivo[RUTA_MAX]` y una lista `OrdenArchivo lista[TABLA_TAMANO_X * TABLA_TAMANO_Y]`, y sencillamente carga los contenidos del archivo `direccion_archivo` en la lista `lista`.
+Esta función toma por parámetros una dirección de archivo `char direccion_archivo[RUTA_MAX]` y una lista `OrdenArchivo lista[TABLA_TAMANO_X * TABLA_TAMANO_Y]`, y sencillamente carga los contenidos del archivo `direccion_archivo` en la lista `lista`.
 
-Seguidamente, la funcion `cargarArchivo` convierte el contenido de la lista `lista_archivo` con la función `listaATabla(lista_archivo, tabla)`.
+Seguidamente, la función `cargarArchivo` convierte el contenido de la lista `lista_archivo` con la función `listaATabla(lista_archivo, tabla)`.
 
 Finalmente, se validan los _registros_ de la tabla con la función `validarTabla(tabla)`.
 
@@ -715,7 +717,7 @@ void mostrarRegistro(Orden registro, int x, int y) {
 }
 ```
 
-Muestra un registro dado como parametro, variable por variable, en un formato estético visualmente.
+Muestra un registro dado como parámetro, variable por variable, en un formato estético visualmente.
 
 ```console
 ┌──────────────────────────────────────┐
@@ -730,7 +732,7 @@ Muestra un registro dado como parametro, variable por variable, en un formato es
 └─ Presione Enter para continuar… ─────┘
 ```
 
-Tambien utilizo un bucle `for ()` para identificar cuantos digitos tienen los números mostrados por pantalla, para así poder determinar cuantos espacios en blanco se deben desplazar a la derecha para que todos los valores estén justificados del mismo modo.
+También utilizo un bucle `for ()` para identificar cuantos digitos tienen los números mostrados por pantalla, para así poder determinar cuántos espacios en blanco se deben desplazar a la derecha para que todos los valores estén justificados del mismo modo.
 
 ```cpp
   cout << "│ " <<  "Espera [Segundos]: ";
@@ -749,7 +751,7 @@ Finalmente, se le solicita al usuario interactuar con el programa para continuar
   cout << "└──────────────────────────────────────┘ " << endl;
 ```
 
-Acá se utiliza una secuencia _ANSI_ para, al usuario presionar el _Enter_, volver a la linea anterior y sobreescribirla con una linea continua, sobreescribiendo el mensaje de `Presione Enter para continuar…`.
+Acá se utiliza una secuencia _ANSI_ para, al usuario presionar el _Enter_, volver a la línea anterior y sobreescribirla con una línea continua, sobreescribiendo el mensaje de `Presione Enter para continuar…`.
 
 Una vez recorrida la tabla por completo, se vuelve al menú principal.
 
@@ -844,7 +846,7 @@ void poblarTabla(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y]) {
 Se solicita una celda de despegue, y una vez validada la celda, se asigna de despegue y se procede a poblar el resto de la tabla con `poblarRegistro(tabla[x][y], x, y, flags)`.
 
 ```cpp
-// Solicita valores al usuario para  un registro.
+// Solicita valores al usuario para un registro.
 void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
   char respuesta = '\0';
   unsigned int respuesta_tiempo = 0;
@@ -1080,6 +1082,74 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 }
 ```
 
+`poblarRegistro()` solicita uno por uno los valores que conforman un registro de una tabla de órdenes.
+
+```cpp
+// Comprueba la existencia de un archivo en una dirección dada.
+// Retorna "false" si no existe.
+bool buscarArchivo(char direccion_archivo[RUTA_MAX], char modo) {
+  FILE *archivo;
+  int tamaño_archivo = 0;
+  char respuesta = '\0';
+
+  cout << CURSOR;
+  cin.getline(direccion_archivo, RUTA_MAX);
+  //cin >> direccion_archivo;
+
+  switch (modo) {
+    case 'r':
+      ⋮
+      break;
+    case 'w':
+      archivo = fopen(direccion_archivo, "r");
+      if (archivo == NULL) {
+        archivo = fopen(direccion_archivo, "w");
+        if (archivo == NULL) { // No existe el directorio, no se puede crear
+          cout << ERROR; // MSG_ERROR
+          cout << "La dirección del archivo ingresada es inválida. ";
+          cout << "Por favor, vuelva a intentarlo o ingrese una ruta válida." << endl;
+          return false;
+        }
+        break; // No existe el archivo, se puede crear.
+      }
+
+      fclose(archivo); // Si existe.
+      archivo = NULL;
+      cout << WARN; // MSG_WARN
+      cout << "El archivo ya existe. ¿Desea sobreescribirlo? [s/N]" << endl;
+      do {
+        cout << CURSOR;
+        cin.get(respuesta);
+        switch (respuesta) {
+          default:
+            cout << ERROR; // MSG_ERROR
+            cout << "Respuesta no valida. Vuelva a intentarlo." << endl;
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Leading whitespace.
+            continue;
+          case 's':
+          case 'S':
+            if (!(archivo = fopen(direccion_archivo, "w"))) {
+              cout << ERROR; // MSG_ERROR
+              cout << "No se pudo sobreescribir el archivo." << endl;
+              archivo = NULL;
+              break; // "archivo_ataque" == NULL.
+            }
+            fclose(archivo);
+            break; // "archivo_ataque" != NULL.
+          case 'n':
+          case 'N':
+          case '\n':
+            cout << "Ingrese una ruta diferente." << endl;
+            return false;
+        }
+        if (respuesta != '\n') cin.ignore(); // Leading whitespace.
+      } while (archivo == NULL);
+  }
+
+  return true;
+}
+```
+
 ---
 
 ### _Modificar registro_
@@ -1312,13 +1382,62 @@ void modificarRegistroDeArchivo() {
 }
 ```
 
+El procedimiento para modificar un registro de un archivo es similar al de simplemente modificar uno de una tabla cargada en memoria, solo que conlleva más comprobaciones.
 
+```cpp
+    if (!buscarArchivo(direccion_archivo, 'r')) continue;
+    if (!leerArchivo(direccion_archivo, lista_archivo)) continue;
+```
+
+Primero se solicita la dirección del archivo a modificar con `buscarArchivo()`, y se carga el contenido del mismo archivo a la lista `lista_archivo` mediante `leerArchivo()`.
+
+```cpp
+    listaATabla(lista_archivo, tabla);
+    if (!validarTabla(tabla)) continue;
+    if (!modificarRegistro(tabla)) return;
+```
+
+La lista se adapta a una tabla con `listaATabla()`, y se valida mediante `validarTabla()`.
+
+```cpp
+    tablaALista(lista_archivo, tabla);
+    if (!escribirArchivo(direccion_archivo, lista_archivo)) continue;
+```
+
+Se solicitan y modifican los registros indicados por el usuario con `modificarRegistro()`, y una vez finalizado el proceso, se vuelve a adaptar la tabla modificada a una lista y se almacena en el mismo archivo ingresado.
+
+Si uno solo de estos procesos falla, el programa devuelve un error por pantalla y el bucle `while ()` vuelve a comenzar.
 
 ---
 
 ### _Guardar ataque_
 
-…
+```cpp
+// Almacena la tabla de memoria que luego almacena en un archivo nuevo.
+void guardarAtaque(Orden tabla[TABLA_TAMANO_X][TABLA_TAMANO_Y], char direccion_archivo[RUTA_MAX]) {
+  OrdenArchivo lista_archivo[TABLA_TAMANO_X * TABLA_TAMANO_Y];
+
+  cout << "Por favor, ingrese la ruta donde guardar el archivo." << endl;
+  while(true) {
+    if (!buscarArchivo(direccion_archivo, 'w')) continue;
+    tablaALista(lista_archivo, tabla);
+    if (!escribirArchivo(direccion_archivo, lista_archivo)) continue;
+    break;
+  }
+
+  return;
+}
+```
+
+Para almacenar una tabla de órdenes de la memoria del programa en un archivo, primero el programa le solicita al usuario una dirección de archivo válida para escritura, utilizando `buscarArchivo()`, pasando como parámetro el modo `'w'`.
+
+Una vez creado el archivo, se pasa el contenido de la tabla a una lista `lista_archivo` y se almacena en el archivo creado, con `escribirArchivo()`.
+
+```cpp
+    if (!buscarArchivo(direccion_archivo, 'w')) continue;
+    tablaALista(lista_archivo, tabla);
+    if (!escribirArchivo(direccion_archivo, lista_archivo)) continue;
+```
 
 ---
 
@@ -1575,7 +1694,6 @@ for (int k = 0; k < TABLA_TAMANO_Y; k++) {
 Y finalmente se guarda el archivo, y el programa se devuelve al menú principal.
 
 ---
-
 
 ## Uso de Inteligencia Artificial
 
