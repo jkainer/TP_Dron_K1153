@@ -1085,6 +1085,29 @@ void poblarRegistro(Orden &registro, int x, int y, Flags &flags) {
 `poblarRegistro()` solicita uno por uno los valores que conforman un registro de una tabla de órdenes.
 
 ```cpp
+    if (!validarTabla(tabla)) {
+      cout << ERROR; // MSG_ERROR
+      cout << "La tabla de órdenes creada es inválida. Vuelva a crearla." << endl; 
+      continue;
+    }
+```
+
+Se valida la tabla creada, y se adapta la tabla a una lista mediante `tablaALista()`.
+
+```cpp
+  tablaALista(lista_archivo, tabla);
+
+  cout << "Por favor, ingrese la ruta donde guardar el archivo." << endl;
+  while (true) {
+    if (!buscarArchivo(direccion_archivo, 'w')) continue;
+    if (!escribirArchivo(direccion_archivo, lista_archivo)) continue;
+    break;
+  }
+```
+
+Finalmente procede a solicitar la dirección donde guardar el archivo con `buscarArchivo()`, pasando como parámetro de modo `'w'`:
+
+```cpp
 // Comprueba la existencia de un archivo en una dirección dada.
 // Retorna "false" si no existe.
 bool buscarArchivo(char direccion_archivo[RUTA_MAX], char modo) {
@@ -1149,6 +1172,40 @@ bool buscarArchivo(char direccion_archivo[RUTA_MAX], char modo) {
   return true;
 }
 ```
+
+Con el modo `'w'`, en primera instancia, se comprueba que la dirección introducida por el usuario sea una válida, seguido, se comprueba que el archivo no exista previamente. En caso de hacerlo, se le consulta al usuario si lo desea sobreescribir. Si no lo desea, se solicita una ruta nueva de archivo
+
+Se crea el archivo en la ruta introducida por el usuario, y se procede a la escritura de este.
+
+```cpp
+bool escribirArchivo(
+  char direccion_archivo[RUTA_MAX],
+  OrdenArchivo lista[TABLA_TAMANO_X * TABLA_TAMANO_Y]
+) {
+  FILE *archivo;
+
+  cout << "Guardando tabla de órdenes en ";
+  cout << "\"" << direccion_archivo << "\"";
+  cout << "…" << endl;
+
+  archivo = fopen(direccion_archivo, "w+b");
+  if (!fwrite(lista, sizeof(OrdenArchivo), TABLA_TAMANO_X * TABLA_TAMANO_Y, archivo)) {
+    cout << ERROR; // MSG_ERROR
+    cout << "Error al guardar la tabla en ";
+    cout << "\"" << direccion_archivo << "\"" << endl;
+    cout << ". Puede que el archivo se haya movido o borrado. Vuelva a intentarlo." << endl;
+    return false;
+  }
+  cout << "Archivo guardado correctamente." << endl;
+  cout << "Presione Enter para continuar… "; // MSG_SUCCESS
+  cin.ignore();
+  fclose(archivo);
+
+  return true;
+}
+```
+
+Se escribe el contenido de la tabla en el archivo creado, y se vuelve al menú principal.
 
 ---
 
@@ -1693,13 +1750,11 @@ for (int k = 0; k < TABLA_TAMANO_Y; k++) {
 
 Y finalmente se guarda el archivo, y el programa se devuelve al menú principal.
 
----
-
 ## Uso de Inteligencia Artificial
 
 Si bien cada día la inteligencia artificial demuestra ser una herramienta cada vez más poderosa, el equipo tomó la decisión de __no__ utilizarla en lo absoluto durante el desarrollo de este proyecto.
 
-Consideramos que en una etapa de formación y desarrollo como es un trabajo práctico para un organismo académico como es la universidad, se castiga no solo con la reducción de oportunidades para aplicar y entrenar la habilidad de resolución de problemas, habilidad fundamental en y para una ingeniería, sino también la de la incerteza e falibilidad fundamentalmente ligadas a todo modelo generativo de lenguaje (LLM) por su mismo diseño.
+Consideramos que en una etapa de formación y desarrollo como es un trabajo práctico para un organismo académico como la universidad, se castiga no solo con la reducción de oportunidades para aplicar y entrenar la habilidad de resolución de problemas, habilidad fundamental en y para una ingeniería, sino también la de la incerteza e falibilidad fundamentalmente ligadas a todo modelo generativo de lenguaje (LLM) por su mismo diseño.
 
 Al implementar código generado de manera artificial, se reduce su comprensión fundamental en el desarrollador que, en vez de redactarlo, se rebaja a reseñarlo, ya que está delegando el proceso cognitivo fundamentalmente ligado a diseñar un sistema a una máquina y solo ve el resultado ya funcional.
 Esto desliga al diseñador a un mero espectador de un sistema ya funcional cuyo comportamiento comprende, más no la razón del porqué, ya que no ha reflexionado en sus implementaciones alternativas.
@@ -1723,3 +1778,7 @@ Se agradece cordialmente a Roxana Dabusti y Deix Surita por la ayuda proporciona
 [The C Programming Language - Brian W. Kernighan & Dennis M. Ritchie](https://seriouscomputerist.atariverse.com/media/pdf/book/C%20Programming%20Language%20-%202nd%20Edition%20(OCR).pdf)
 
 [_https://cplusplus.com/_](https://cplusplus.com/forum/), [_https://stackoverflow.com/_](https://stackoverflow.com), [_https://www.geeksforgeeks.org/_](https://www.geeksforgeeks.org/), [_https://en.cppreference.com/_](https://en.cppreference.com/cpp/), & [_https://www.learncpp.com/_](https://www.learncpp.com/)
+
+---
+
+###### Esta página mide 1200 cm!
